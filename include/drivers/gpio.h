@@ -516,6 +516,10 @@ struct gpio_callback {
 	 * an interrupt.
 	 */
 	gpio_port_pins_t pin_mask;
+
+	/** Used for Swift callback
+	 */
+	void *user_data;
 };
 
 /**
@@ -1253,6 +1257,17 @@ static inline void gpio_init_callback(struct gpio_callback *callback,
 
 	callback->handler = handler;
 	callback->pin_mask = pin_mask;
+}
+
+/**
+ * Used for Swift callback
+ */
+static inline void gpio_user_data_set(struct gpio_callback *callback,
+						void *user_data)
+{
+	__ASSERT(user_data, "Callback user_data pointer should not be NULL");
+
+	callback->user_data = user_data;
 }
 
 /**

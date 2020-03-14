@@ -25,9 +25,98 @@ struct pwm_mcux_config {
 };
 
 struct pwm_mcux_data {
-	uint32_t period_cycles[CHANNEL_COUNT];
-	pwm_signal_param_t channel[CHANNEL_COUNT];
+	uint32_t period_cycles;
+	pwm_signal_param_t channel;
 };
+
+
+static void PWM_UpdatePwmDutycycleFloat(PWM_Type *base,
+                            pwm_submodule_t subModule,
+                            pwm_channels_t pwmSignal,
+                            pwm_mode_t currPwmMode,
+                            float dutyCyclePercent)
+{
+    assert(((uint8_t)dutyCyclePercent) <= 100);
+    assert(pwmSignal < 2);
+    uint16_t pulseCnt = 0, pwmHighPulse = 0;
+    int16_t modulo = 0;
+
+    switch (currPwmMode)
+    {
+        case kPWM_SignedCenterAligned:
+            modulo   = base->SM[subModule].VAL1;
+            pulseCnt = modulo * 2;
+            /* Calculate pulse width */
+            pwmHighPulse = (uint16_t)(((float)pulseCnt * dutyCyclePercent) / 100.0);
+
+            /* Setup the PWM dutycycle */
+            if (pwmSignal == kPWM_PwmA)
+            {
+                base->SM[subModule].VAL2 = (-(pwmHighPulse / 2));
+                base->SM[subModule].VAL3 = (pwmHighPulse / 2);
+            }
+            else
+            {
+                base->SM[subModule].VAL4 = (-(pwmHighPulse / 2));
+                base->SM[subModule].VAL5 = (pwmHighPulse / 2);
+            }
+            break;
+        case kPWM_CenterAligned:
+            pulseCnt = base->SM[subModule].VAL1;
+            /* Calculate pulse width */
+            pwmHighPulse = (uint16_t)(((float)pulseCnt * dutyCyclePercent) / 100.0);
+
+            /* Setup the PWM dutycycle */
+            if (pwmSignal == kPWM_PwmA)
+            {
+                base->SM[subModule].VAL2 = ((pulseCnt - pwmHighPulse) / 2);
+                base->SM[subModule].VAL3 = ((pulseCnt + pwmHighPulse) / 2);
+            }
+            else
+            {
+                base->SM[subModule].VAL4 = ((pulseCnt - pwmHighPulse) / 2);
+                base->SM[subModule].VAL5 = ((pulseCnt + pwmHighPulse) / 2);
+            }
+            break;
+        case kPWM_SignedEdgeAligned:
+            modulo   = base->SM[subModule].VAL1;
+            pulseCnt = modulo * 2;
+            /* Calculate pulse width */
+            pwmHighPulse = (uint16_t)(((float)pulseCnt * dutyCyclePercent) / 100.0);
+
+            /* Setup the PWM dutycycle */
+            if (pwmSignal == kPWM_PwmA)
+            {
+                base->SM[subModule].VAL2 = (-modulo);
+                base->SM[subModule].VAL3 = (-modulo + pwmHighPulse);
+            }
+            else
+            {
+                base->SM[subModule].VAL4 = (-modulo);
+                base->SM[subModule].VAL5 = (-modulo + pwmHighPulse);
+            }
+            break;
+        case kPWM_EdgeAligned:
+            pulseCnt = base->SM[subModule].VAL1;
+            /* Calculate pulse width */
+            pwmHighPulse = (uint16_t)(((float)pulseCnt * dutyCyclePercent) / 100.0);
+
+            /* Setup the PWM dutycycle */
+            if (pwmSignal == kPWM_PwmA)
+            {
+                base->SM[subModule].VAL2 = 0;
+                base->SM[subModule].VAL3 = pwmHighPulse;
+            }
+            else
+            {
+                base->SM[subModule].VAL4 = 0;
+                base->SM[subModule].VAL5 = pwmHighPulse;
+            }
+            break;
+        default:
+            break;
+    }
+}
 
 static int mcux_pwm_pin_set(struct device *dev, u32_t pwm,
 			    u32_t period_cycles, u32_t pulse_cycles,
@@ -36,8 +125,9 @@ static int mcux_pwm_pin_set(struct device *dev, u32_t pwm,
 	const struct pwm_mcux_config *config = dev->config->config_info;
 	struct pwm_mcux_data *data = dev->driver_data;
 	u8_t duty_cycle;
+	float duty_cycle_float;
 
-	if (pwm >= CHANNEL_COUNT) {
+	if (pwm >= CHANNEL_COUNT + 2) {
 		LOG_ERR("Invalid channel");
 		return -EINVAL;
 	}
@@ -62,14 +152,19 @@ static int mcux_pwm_pin_set(struct device *dev, u32_t pwm,
 	}
 
 	duty_cycle = 100 * pulse_cycles / period_cycles;
+	duty_cycle_float = (float)(100 * pulse_cycles) / (float)period_cycles;
 
 	/* FIXME: Force re-setup even for duty-cycle update */
-	if (period_cycles != data->period_cycles[pwm]) {
+	//if (period_cycles != data->period_cycles) {
+    // Update dutycycle and frequency
+	if (pwm >=  CHANNEL_COUNT) {
 		uint32_t clock_freq;
 		uint32_t pwm_freq;
 		status_t status;
 
-		data->period_cycles[pwm] = period_cycles;
+		pwm -= 2;
+
+		data->period_cycles = period_cycles;
 
 		LOG_DBG("SETUP dutycycle to %u\n", duty_cycle);
 
@@ -83,23 +178,32 @@ static int mcux_pwm_pin_set(struct device *dev, u32_t pwm,
 
 		PWM_StopTimer(config->base, 1U << config->index);
 
-		data->channel[pwm].dutyCyclePercent = duty_cycle;
+		data->channel.pwmChannel = (pwm == 0) ? kPWM_PwmA : kPWM_PwmB;
+		data->channel.dutyCyclePercent = duty_cycle;
 
 		status = PWM_SetupPwm(config->base, config->index,
-				      &data->channel[0], CHANNEL_COUNT,
+				      &data->channel, 1,
 				      config->mode, pwm_freq, clock_freq);
 		if (status != kStatus_Success) {
 			LOG_ERR("Could not set up pwm");
 			return -ENOTSUP;
 		}
 
+		PWM_UpdatePwmDutycycleFloat(config->base, config->index,
+				       (pwm == 0) ? kPWM_PwmA : kPWM_PwmB,
+				       config->mode, duty_cycle_float);
+
 		PWM_SetPwmLdok(config->base, 1U << config->index, true);
 
 		PWM_StartTimer(config->base, 1U << config->index);
 	} else {
-		PWM_UpdatePwmDutycycle(config->base, config->index,
+		// Update dutycycle only
+		//PWM_UpdatePwmDutycycle(config->base, config->index,
+		//		       (pwm == 0) ? kPWM_PwmA : kPWM_PwmB,
+		//		       config->mode, duty_cycle);
+		PWM_UpdatePwmDutycycleFloat(config->base, config->index,
 				       (pwm == 0) ? kPWM_PwmA : kPWM_PwmB,
-				       config->mode, duty_cycle);
+				       config->mode, duty_cycle_float);
 		PWM_SetPwmLdok(config->base, 1U << config->index, true);
 	}
 
@@ -137,10 +241,10 @@ static int pwm_mcux_init(struct device *dev)
 	((PWM_Type *)config->base)->SM[config->index].DISMAP[0] = 0x0000;
 	((PWM_Type *)config->base)->SM[config->index].DISMAP[1] = 0x0000;
 
-	data->channel[0].pwmChannel = kPWM_PwmA;
-	data->channel[0].level = kPWM_HighTrue;
-	data->channel[1].pwmChannel = kPWM_PwmB;
-	data->channel[1].level = kPWM_HighTrue;
+	//data->channel[0].pwmChannel = kPWM_PwmA;
+	//data->channel[0].level = kPWM_HighTrue;
+	//data->channel[1].pwmChannel = kPWM_PwmB;
+	data->channel.level = kPWM_HighTrue;
 
 	return 0;
 }
@@ -157,7 +261,7 @@ static const struct pwm_driver_api pwm_mcux_driver_api = {
 		.base = (void *)DT_PWM_MCUX_ ## n ## _BASE_ADDRESS,	  \
 		.index = DT_PWM_MCUX_ ## n ## _INDEX,			  \
 		.mode = kPWM_EdgeAligned,				  \
-		.prescale = kPWM_Prescale_Divide_128,			  \
+		.prescale = kPWM_Prescale_Divide_64,			  \
 		.clock_source = kCLOCK_IpgClk,				  \
 	};								  \
 									  \

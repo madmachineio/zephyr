@@ -386,3 +386,33 @@ static void spi_mcux_config_func_3(struct device *dev)
 	irq_enable(DT_NXP_IMX_LPSPI_SPI_3_IRQ_0);
 }
 #endif /* CONFIG_SPI_3 */
+
+
+#ifdef CONFIG_SPI_4
+static void spi_mcux_config_func_4(struct device *dev);
+
+static const struct spi_mcux_config spi_mcux_config_4 = {
+	.base = (LPSPI_Type *) DT_NXP_IMX_LPSPI_SPI_4_BASE_ADDRESS,
+	.clock_name = DT_NXP_IMX_LPSPI_SPI_4_CLOCK_CONTROLLER,
+	.clock_subsys = (clock_control_subsys_t) DT_NXP_IMX_LPSPI_SPI_4_CLOCK_NAME,
+	.irq_config_func = spi_mcux_config_func_4,
+};
+
+static struct spi_mcux_data spi_mcux_data_4 = {
+	SPI_CONTEXT_INIT_LOCK(spi_mcux_data_4, ctx),
+	SPI_CONTEXT_INIT_SYNC(spi_mcux_data_4, ctx),
+};
+
+DEVICE_AND_API_INIT(spi_mcux_4, DT_NXP_IMX_LPSPI_SPI_4_LABEL, &spi_mcux_init,
+		    &spi_mcux_data_4, &spi_mcux_config_4,
+		    POST_KERNEL, CONFIG_KERNEL_INIT_PRIORITY_DEVICE,
+		    &spi_mcux_driver_api);
+
+static void spi_mcux_config_func_4(struct device *dev)
+{
+	IRQ_CONNECT(DT_NXP_IMX_LPSPI_SPI_4_IRQ_0, DT_NXP_IMX_LPSPI_SPI_4_IRQ_0_PRIORITY,
+		    spi_mcux_isr, DEVICE_GET(spi_mcux_4), 0);
+
+	irq_enable(DT_NXP_IMX_LPSPI_SPI_4_IRQ_0);
+}
+#endif /* CONFIG_SPI_4 */

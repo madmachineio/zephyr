@@ -38,4 +38,14 @@ config UART_MCUX_LPUART_4
 	help
 	  Enable UART 4.
 
+config UART_MCUX_LPUART_6
+	bool "UART 6"
+	help
+	  Enable UART 6.
+
+config UART_MCUX_LPUART_8
+	bool "UART 8"
+	help
+	  Enable UART 8.
+
 endif # UART_MCUX_LPUART

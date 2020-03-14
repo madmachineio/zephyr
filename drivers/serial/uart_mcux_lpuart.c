@@ -260,10 +260,66 @@ static int mcux_lpuart_init(struct device *dev)
 	return 0;
 }
 
+static int mcux_lpuart_configure(struct device *dev, const struct uart_config *cfg)
+{
+	const struct mcux_lpuart_config *config = dev->config->config_info;
+	lpuart_config_t uart_config;
+	struct device *clock_dev;
+	u32_t clock_freq;
+
+	clock_dev = device_get_binding(config->clock_name);
+	if (clock_dev == NULL) {
+		return -EINVAL;
+	}
+
+	if (clock_control_get_rate(clock_dev, config->clock_subsys,
+				   &clock_freq)) {
+		return -EINVAL;
+	}
+
+	LPUART_GetDefaultConfig(&uart_config);
+	uart_config.enableTx = true;
+	uart_config.enableRx = true;
+
+	uart_config.baudRate_Bps = cfg->baudrate;
+
+    switch(cfg->parity) {
+        case UART_CFG_PARITY_ODD:
+            uart_config.parityMode = kLPUART_ParityOdd;
+            break;
+        case UART_CFG_PARITY_EVEN:
+            uart_config.parityMode = kLPUART_ParityEven;
+            break;
+        default:
+            uart_config.parityMode = kLPUART_ParityDisabled;
+            break;
+    }
+
+    switch(cfg->stop_bits) {
+        case UART_CFG_STOP_BITS_2:
+            uart_config.stopBitCount = kLPUART_TwoStopBit;
+            break;
+        default:
+            uart_config.stopBitCount = kLPUART_OneStopBit;
+            break;
+    }
+
+    switch(cfg->data_bits) {
+        default:
+            uart_config.dataBitsCount = kLPUART_EightDataBits;
+            break;
+    }
+
+	LPUART_Init(config->base, &uart_config, clock_freq);
+
+	return 0;
+}
+
 static const struct uart_driver_api mcux_lpuart_driver_api = {
 	.poll_in = mcux_lpuart_poll_in,
 	.poll_out = mcux_lpuart_poll_out,
 	.err_check = mcux_lpuart_err_check,
+	.configure = mcux_lpuart_configure,
 #ifdef CONFIG_UART_INTERRUPT_DRIVEN
 	.fifo_fill = mcux_lpuart_fifo_fill,
 	.fifo_read = mcux_lpuart_fifo_read,
@@ -511,3 +567,96 @@ static void mcux_lpuart_config_func_4(struct device *dev)
 #endif
 
 #endif /* CONFIG_UART_MCUX_LPUART_4 */
+
+#ifdef CONFIG_UART_MCUX_LPUART_6
+
+#ifdef CONFIG_UART_INTERRUPT_DRIVEN
+static void mcux_lpuart_config_func_6(struct device *dev);
+#endif
+
+static const struct mcux_lpuart_config mcux_lpuart_6_config = {
+	.base = (LPUART_Type *) DT_NXP_KINETIS_LPUART_UART_6_BASE_ADDRESS,
+	.clock_name = DT_NXP_KINETIS_LPUART_UART_6_CLOCK_CONTROLLER,
+	.clock_subsys =
+		(clock_control_subsys_t)DT_NXP_KINETIS_LPUART_UART_6_CLOCK_NAME,
+	.baud_rate = DT_NXP_KINETIS_LPUART_UART_6_CURRENT_SPEED,
+#ifdef CONFIG_UART_INTERRUPT_DRIVEN
+	.irq_config_func = mcux_lpuart_config_func_6,
+#endif
+};
+
+static struct mcux_lpuart_data mcux_lpuart_6_data;
+
+DEVICE_AND_API_INIT(uart_6, DT_NXP_KINETIS_LPUART_UART_6_LABEL,
+		    &mcux_lpuart_init,
+		    &mcux_lpuart_6_data, &mcux_lpuart_6_config,
+		    PRE_KERNEL_1, CONFIG_KERNEL_INIT_PRIORITY_DEVICE,
+		    &mcux_lpuart_driver_api);
+
+#ifdef CONFIG_UART_INTERRUPT_DRIVEN
+static void mcux_lpuart_config_func_6(struct device *dev)
+{
+	IRQ_CONNECT(DT_NXP_KINETIS_LPUART_UART_6_IRQ_0,
+		    DT_NXP_KINETIS_LPUART_UART_6_IRQ_0_PRIORITY,
+		    mcux_lpuart_isr, DEVICE_GET(uart_6), 0);
+
+	irq_enable(DT_NXP_KINETIS_LPUART_UART_6_IRQ_0);
+
+#ifdef DT_NXP_KINETIS_LPUART_UART_6_IRQ_1
+	IRQ_CONNECT(DT_NXP_KINETIS_LPUART_UART_6_IRQ_1,
+		    DT_NXP_KINETIS_LPUART_UART_6_IRQ_1_PRIORITY,
+		    mcux_lpuart_isr, DEVICE_GET(uart_6), 0);
+
+	irq_enable(DT_NXP_KINETIS_LPUART_UART_6_IRQ_1);
+#endif /* DT_NXP_KINETIS_LPUART_UART_6_IRQ_1 */
+}
+#endif
+
+#endif /* CONFIG_UART_MCUX_LPUART_6 */
+
+
+#ifdef CONFIG_UART_MCUX_LPUART_8
+
+#ifdef CONFIG_UART_INTERRUPT_DRIVEN
+static void mcux_lpuart_config_func_8(struct device *dev);
+#endif
+
+static const struct mcux_lpuart_config mcux_lpuart_8_config = {
+	.base = (LPUART_Type *) DT_NXP_KINETIS_LPUART_UART_8_BASE_ADDRESS,
+	.clock_name = DT_NXP_KINETIS_LPUART_UART_8_CLOCK_CONTROLLER,
+	.clock_subsys =
+		(clock_control_subsys_t)DT_NXP_KINETIS_LPUART_UART_8_CLOCK_NAME,
+	.baud_rate = DT_NXP_KINETIS_LPUART_UART_8_CURRENT_SPEED,
+#ifdef CONFIG_UART_INTERRUPT_DRIVEN
+	.irq_config_func = mcux_lpuart_config_func_8,
+#endif
+};
+
+static struct mcux_lpuart_data mcux_lpuart_8_data;
+
+DEVICE_AND_API_INIT(uart_8, DT_NXP_KINETIS_LPUART_UART_8_LABEL,
+		    &mcux_lpuart_init,
+		    &mcux_lpuart_8_data, &mcux_lpuart_8_config,
+		    PRE_KERNEL_1, CONFIG_KERNEL_INIT_PRIORITY_DEVICE,
+		    &mcux_lpuart_driver_api);
+
+#ifdef CONFIG_UART_INTERRUPT_DRIVEN
+static void mcux_lpuart_config_func_8(struct device *dev)
+{
+	IRQ_CONNECT(DT_NXP_KINETIS_LPUART_UART_8_IRQ_0,
+		    DT_NXP_KINETIS_LPUART_UART_8_IRQ_0_PRIORITY,
+		    mcux_lpuart_isr, DEVICE_GET(uart_8), 0);
+
+	irq_enable(DT_NXP_KINETIS_LPUART_UART_8_IRQ_0);
+
+#ifdef DT_NXP_KINETIS_LPUART_UART_8_IRQ_1
+	IRQ_CONNECT(DT_NXP_KINETIS_LPUART_UART_8_IRQ_1,
+		    DT_NXP_KINETIS_LPUART_UART_8_IRQ_1_PRIORITY,
+		    mcux_lpuart_isr, DEVICE_GET(uart_8), 0);
+
+	irq_enable(DT_NXP_KINETIS_LPUART_UART_8_IRQ_1);
+#endif /* DT_NXP_KINETIS_LPUART_UART_8_IRQ_1 */
+}
+#endif
+
+#endif /* CONFIG_UART_MCUX_LPUART_8 */

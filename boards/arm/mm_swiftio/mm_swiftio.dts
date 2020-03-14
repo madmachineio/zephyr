@@ -68,6 +68,43 @@
 	current-speed = <115200>;
 };
 
+&uart2 {
+	status = "okay";
+	current-speed = <115200>;
+};
+
+&uart4 {
+	status = "okay";
+	current-speed = <115200>;
+};
+
+&uart6 {
+	status = "okay";
+	current-speed = <115200>;
+};
+
+&uart8 {
+	status = "okay";
+	current-speed = <115200>;
+};
+
+&i2c1 {
+	status = "okay";
+};
+
+&i2c3 {
+	status = "okay";
+};
+
+
+&spi3 {
+	status = "okay";
+};
+
+&spi4 {
+	status = "okay";
+};
+
 &usbd1 {
 	status = "okay";
 };

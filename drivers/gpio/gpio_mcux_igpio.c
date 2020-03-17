@@ -121,13 +121,20 @@ static int mcux_igpio_pin_interrupt_configure(struct device *dev,
 	u8_t icr;
 	int shift;
 
+	if(mode == GPIO_INT_MODE_DISABLED){
+		WRITE_BIT(base->ISR, pin, 1);
+		WRITE_BIT(base->IMR, pin, 0);
+		WRITE_BIT(data->pin_callback_enables, pin, 0);
+		return 0;
+	}
+
 	if ((mode == GPIO_INT_MODE_EDGE) && (trig == GPIO_INT_TRIG_LOW)) {
 		icr = 3;
 	} else if ((mode == GPIO_INT_MODE_EDGE) &&
-		   (trig == GPIO_INT_TRIG_HIGH)) {
+		(trig == GPIO_INT_TRIG_HIGH)) {
 		icr = 2;
 	} else if ((mode == GPIO_INT_MODE_LEVEL) &&
-		   (trig == GPIO_INT_TRIG_HIGH)) {
+		(trig == GPIO_INT_TRIG_HIGH)) {
 		icr = 1;
 	} else {
 		icr = 0;
@@ -149,7 +156,7 @@ static int mcux_igpio_pin_interrupt_configure(struct device *dev,
 	WRITE_BIT(base->ISR, pin, mode != GPIO_INT_MODE_DISABLED);
 	WRITE_BIT(base->IMR, pin, mode != GPIO_INT_MODE_DISABLED);
 	WRITE_BIT(data->pin_callback_enables, pin,
-		  mode != GPIO_INT_MODE_DISABLED);
+	mode != GPIO_INT_MODE_DISABLED);
 
 	irq_unlock(key);
 
@@ -196,7 +203,7 @@ static void mcux_igpio_port_isr(void *arg)
 	enabled_int = int_flags & data->pin_callback_enables;
 	base->ISR = enabled_int;
 
-	gpio_fire_callbacks(&data->callbacks, dev, enabled_int);
+		gpio_fire_callbacks(&data->callbacks, dev, enabled_int);
 }
 
 static const struct gpio_driver_api mcux_igpio_driver_api = {

@@ -170,6 +170,9 @@ static int spi_mcux_configure(struct device *dev,
 		: kLPSPI_MsbFirst;
 
 	master_config.baudRate = spi_cfg->frequency;
+	master_config.betweenTransferDelayInNanoSec = 1000000000U / master_config.baudRate * 2;
+	master_config.lastSckToPcsDelayInNanoSec = 1000000000U / master_config.baudRate * 2;
+	master_config.pcsToSckDelayInNanoSec = 1000000000U / master_config.baudRate * 2;
 
 	clock_dev = device_get_binding(config->clock_name);
 	if (clock_dev == NULL) {
@@ -180,6 +183,8 @@ static int spi_mcux_configure(struct device *dev,
 				   &clock_freq)) {
 		return -EINVAL;
 	}
+
+	printk("spi clock freq %u\n", clock_freq);
 
 	LPSPI_MasterInit(base, &master_config, clock_freq);
 

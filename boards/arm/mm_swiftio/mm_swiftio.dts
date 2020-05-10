@@ -111,6 +111,5 @@
 
 &usdhc1 {
 	status = "okay";
-	pwr-gpios = <&gpio1 5 0>;
-	cd-gpios = <&gpio2 28 0>;
+	cd-gpios = <&gpio2 28 GPIO_ACTIVE_LOW>;
 };

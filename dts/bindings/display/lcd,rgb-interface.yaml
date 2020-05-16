@@ -1,0 +1,46 @@
+# Copyright (c) 2020, MADMACHINE LIMITED
+# SPDX-License-Identifier: Apache-2.0
+
+description: LCD module with LED backlight and RGB Interface
+
+compatible: "lcd,rgb-interface"
+
+properties:
+    width:
+      type: int
+      required: true
+      description: lcd panel width
+    height:
+      type: int
+      required: true
+      description: lcd panel height
+    hsw:
+      type: int
+      required: true
+      description: HSYNC pulse width
+    hfp:
+      type: int
+      required: true
+      description: HSD front porch
+    hbp:
+      type: int
+      required: true
+      description: HSD back porch
+    vsw:
+      type: int
+      required: true
+      description: VSYNC pulse width
+    vfp:
+      type: int
+      required: true
+      description: VSD front porch
+    vbp:
+      type: int
+      required: true
+      description: VSD back porch
+    frame-per-sec:
+      type: int
+      required: false
+      description: frame rate
+
+include: base.yaml

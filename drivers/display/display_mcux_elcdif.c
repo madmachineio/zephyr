@@ -248,6 +248,27 @@ static struct mcux_elcdif_config mcux_elcdif_config_1 = {
 	.pixel_format = PIXEL_FORMAT_BGR_565,
 	.bits_per_pixel = 16,
 #endif
+
+#ifdef CONFIG_MCUX_ELCDIF_PANEL_RGBLCD
+	.rgb_mode = {
+		.panelWidth = DT_LCD_RGB_INTERFACE_PANEL_WIDTH,
+		.panelHeight = DT_LCD_RGB_INTERFACE_PANEL_HEIGHT,
+		.hsw = DT_LCD_RGB_INTERFACE_PANEL_HSW,
+		.hfp = DT_LCD_RGB_INTERFACE_PANEL_HFP,
+		.hbp = DT_LCD_RGB_INTERFACE_PANEL_HBP,
+		.vsw = DT_LCD_RGB_INTERFACE_PANEL_VSW,
+		.vfp = DT_LCD_RGB_INTERFACE_PANEL_VFP,
+		.vbp = DT_LCD_RGB_INTERFACE_PANEL_VBP,
+		.polarityFlags = kELCDIF_DataEnableActiveHigh |
+				 kELCDIF_VsyncActiveLow |
+				 kELCDIF_HsyncActiveLow |
+				 kELCDIF_DriveDataOnRisingClkEdge,
+		.pixelFormat = kELCDIF_PixelFormatRGB565,
+		.dataBus = kELCDIF_DataBus16Bit,
+	},
+	.pixel_format = PIXEL_FORMAT_BGR_565,
+	.bits_per_pixel = 16,
+#endif
 };
 
 static struct mcux_elcdif_data mcux_elcdif_data_1;

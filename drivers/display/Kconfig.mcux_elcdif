@@ -40,6 +40,9 @@ choice MCUX_ELCDIF_PANEL
 config MCUX_ELCDIF_PANEL_RK043FN02H
 	bool "Rocktech rk043fn02h-ct"
 
+config MCUX_ELCDIF_PANEL_RGBLCD
+	bool "lcd,rgb-interface"
+
 endchoice
 
 endif # DISPLAY_MCUX_ELCDIF

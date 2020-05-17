@@ -47,8 +47,35 @@
 			label = "RGB B";
 		};
 	};
+
+	panel {
+		compatible = "lcd,rgb-interface";
+		width = <800>;
+		height = <480>;
+		hsw = <1>;
+		hfp = <22>;
+		hbp = <46>;
+		vsw = <1>;
+		vfp = <22>;
+		vbp = <23>;
+		frame-per-sec = <60>;
+
+		port {
+			lcd_panel_in: endpoint {
+				remote-endpoint = <&lcd_panel_out>;
+			};
+		};
+	};
 };
 
+&lcdif1 {
+	status = "okay";
+	port {
+		lcd_panel_out: endpoint {
+			remote-endpoint = <&lcd_panel_in>;
+		};
+	};
+};
 
 &flexspi0 {
 	reg = <0x402a8000 0x4000>, <0x60000000 0x800000>;

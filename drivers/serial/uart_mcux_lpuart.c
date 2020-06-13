@@ -132,16 +132,17 @@ static int mcux_lpuart_irq_tx_complete(struct device *dev)
 	const struct mcux_lpuart_config *config = dev->config->config_info;
 	u32_t flags = LPUART_GetStatusFlags(config->base);
 
-	return (flags & kLPUART_TxDataRegEmptyFlag) != 0U;
+	return (flags & kLPUART_TransmissionCompleteFlag) != 0U;
 }
 
 static int mcux_lpuart_irq_tx_ready(struct device *dev)
 {
 	const struct mcux_lpuart_config *config = dev->config->config_info;
 	u32_t mask = kLPUART_TxDataRegEmptyInterruptEnable;
+	u32_t flags = LPUART_GetStatusFlags(config->base);
 
 	return (LPUART_GetEnabledInterrupts(config->base) & mask)
-		&& mcux_lpuart_irq_tx_complete(dev);
+		&& (flags & kLPUART_TxDataRegEmptyFlag);
 }
 
 static void mcux_lpuart_irq_rx_enable(struct device *dev)

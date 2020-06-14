@@ -614,8 +614,13 @@ enum usdhc_capability_flag {
 		USDHC_HOST_CTRL_CAP_VS30_MASK,
 	/*!< Support voltage 3.0V */
 	USDHC_SUPPORT_V180_FLAG =
+#if defined(CONFIG_BOARD_MM_SWIFTIO)
+		SDMMCHOST_NOT_SUPPORT,
+	/*!< No Support voltage 1.8V */
+#else
 		USDHC_HOST_CTRL_CAP_VS18_MASK,
 	/*!< Support voltage 1.8V */
+#endif
 	/* Put additional two flags in
 	 * HTCAPBLT_MBL's position.
 	 */

@@ -11,10 +11,14 @@
 extern "C" {
 #endif
 
-#if defined(CONFIG_FILE_SYSTEM_LITTLEFS)  || defined(CONFIG_FS_FATFS_LFN)
+#if defined(CONFIG_FILE_SYSTEM_LITTLEFS)
 #define MAX_FILE_NAME 256
 #else /* FAT_FS */
+#if defined(CONFIG_FS_FATFS_LFN)
+#define MAX_FILE_NAME CONFIG_FS_FATFS_MAX_LFN
+#else
 #define MAX_FILE_NAME 12 /* Uses 8.3 SFN */
+#endif
 #endif
 
 struct fs_mount_t;

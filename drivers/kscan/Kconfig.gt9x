@@ -1,0 +1,17 @@
+# Copyright (c) 2020 Frank
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig KSCAN_GT9X
+	bool "GT91X capacitive touch panel driver"
+	depends on I2C && HAS_DTS_I2C
+	help
+	  Enable driver for the GT91X capacitive touch panel controller.
+
+config KSCAN_GT9X_PERIOD
+	int "Sample period (ms)"
+	default 10
+	depends on KSCAN_GT9X
+
+config KSCAN_GT9X_INTERRUPT
+	bool "Enable interrupt"
+	depends on KSCAN_GT9X

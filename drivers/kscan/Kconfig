@@ -12,6 +12,7 @@ if KSCAN
 
 source "drivers/kscan/Kconfig.ft5336"
 source "drivers/kscan/Kconfig.xec"
+source "drivers/kscan/Kconfig.gt9x"
 
 module = KSCAN
 module-str = kscan

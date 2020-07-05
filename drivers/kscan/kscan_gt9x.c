@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NXP
+ * Copyright (c) 2020 MADMACHINE
  *
  * SPDX-License-Identifier: Apache-2.0
  */

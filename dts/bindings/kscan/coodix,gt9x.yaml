@@ -8,6 +8,14 @@ compatible: "coodix,gt9x"
 include: [kscan.yaml, i2c-device.yaml]
 
 properties:
+    width:
+      type: int
+      required: true
+      description: touch panel width
+    height:
+      type: int
+      required: true
+      description: touch panel height
     int-gpios:
       type: phandle-array
       required: false

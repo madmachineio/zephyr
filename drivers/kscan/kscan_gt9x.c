@@ -446,6 +446,11 @@ static int gt9x_init(struct device *dev)
 		return -EINVAL;
 	}
 
+	gt9x_cfg_regs[1] = DT_INST_0_COODIX_GT9X_WIDTH & 0xFF;
+	gt9x_cfg_regs[2] = DT_INST_0_COODIX_GT9X_WIDTH >> 8;
+	gt9x_cfg_regs[3] = DT_INST_0_COODIX_GT9X_HEIGHT & 0xFF;
+	gt9x_cfg_regs[4] = DT_INST_0_COODIX_GT9X_HEIGHT >> 8;
+
 
 	reg_num = sizeof(gt9x_cfg_regs);
 	check_sum = 0;
@@ -453,12 +458,14 @@ static int gt9x_init(struct device *dev)
 	{
 		check_sum += (gt9x_cfg_regs[i]<<8) + gt9x_cfg_regs[i+1];
 	}
+	check_sum = 0 - check_sum;
 
 	u8_t buf[reg_num+3];
 	memcpy(buf, gt9x_cfg_regs, reg_num);
 	buf[reg_num] = (check_sum >> 8) & 0xFF;
 	buf[reg_num+1] =  check_sum & 0xFF;
-	reg_num += 2;
+	buf[reg_num+2] =  0x01;
+	reg_num += 3;
 
 	ret = gt9x_write_regs(data->i2c,config->i2c_address,
 		GT9X_REG_CONFIG_DATA, buf, reg_num);
@@ -471,27 +478,26 @@ static int gt9x_init(struct device *dev)
 	k_sleep(K_MSEC(50));
 /*
 	memset(buf, 0, sizeof(buf));
-	gt9x_read_regs(data->i2c,config->i2c_address,
+	ret = gt9x_read_regs(data->i2c,config->i2c_address,
 		GT9X_REG_CONFIG_DATA, buf, sizeof(gt9x_cfg_regs));
+	if (ret != 0) {
+		LOG_ERR("read gt9x fail\n");
+	}
 
 	ret = memcmp(buf, gt9x_cfg_regs, sizeof(gt9x_cfg_regs));
-	LOG_ERR("cmp cfg result %d\n", ret);
+	LOG_INF("cmp cfg result %d\n", ret);
 */
 
-
-
 	data->dev = dev;
-
 
 	k_work_init(&data->work, gt9x_work_handler);
 #ifndef CONFIG_KSCAN_GT9X_INTERRUPT
 	k_timer_init(&data->timer, gt9x_timer_handler, NULL);
 #endif
 
-	gt9x_enable_callback(dev);
-
 	return 0;
 }
+
 
 
 static const struct kscan_driver_api gt9x_driver_api = {
@@ -512,6 +518,12 @@ static const struct gt9x_config gt9x_config = {
 };
 
 static struct gt9x_data gt9x_data;
+
+void Triger_Read(void)
+{
+	gt9x_read(gt9x_data.dev);
+}
+
 
 DEVICE_AND_API_INIT(GT9X, DT_INST_0_COODIX_GT9X_LABEL, gt9x_init,
 		    &gt9x_data, &gt9x_config,

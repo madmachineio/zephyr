@@ -122,6 +122,8 @@
 		compatible = "coodix,gt9x";
 		reg = <0x14>;
 		label = "GT9X";
+		width = <480>;
+		height = <320>;
 		int-gpios = <&gpio1 19 GPIO_ACTIVE_HIGH>;
 		reset-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
 	};

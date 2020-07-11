@@ -52,12 +52,12 @@
 		compatible = "lcd,rgb-interface";
 		width = <800>;
 		height = <480>;
-		hsw = <1>;
-		hfp = <22>;
-		hbp = <46>;
-		vsw = <1>;
-		vfp = <22>;
-		vbp = <23>;
+		hsw = <48>;
+		hfp = <40>;
+		hbp = <88>;
+		vsw = <3>;
+		vfp = <13>;
+		vbp = <32>;
 		frame-per-sec = <60>;
 
 		port {

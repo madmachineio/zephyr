@@ -441,8 +441,12 @@ static int gt9x_init(struct device *dev)
         return -EINVAL;
     }
 
-    if (version[0] != '9' || version[1] != '1' || version[2] != '7' || version[3] != 'S') {
-        LOG_ERR("GT917S Version no match");
+    if (version[0] == '9' && version[1] == '1' && version[2] == '7' && version[3] == 'S') {
+        LOG_INF("Current Device GT917S");
+    } else if (version[0] == '9' && version[1] == '1' && version[2] == '4' && version[3] == '7') {
+        LOG_INF("Current Device GT9147");
+    } else {
+        LOG_ERR("No support %c%c%c%c", version[0], version[1], version[2], version[3]);
         return -EINVAL;
     }
 

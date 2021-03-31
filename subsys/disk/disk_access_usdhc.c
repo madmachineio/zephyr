@@ -617,7 +617,7 @@ enum usdhc_capability_flag {
 		USDHC_HOST_CTRL_CAP_VS30_MASK,
 	/*!< Support voltage 3.0V */
 	USDHC_SUPPORT_V180_FLAG =
-#if defined(CONFIG_BOARD_MM_SWIFTIO)
+#if defined(CONFIG_BOARD_MM_SWIFTIO) || defined(CONFIG_BOARD_MM_FEATHER)
 		SDMMCHOST_NOT_SUPPORT,
 	/*!< No Support voltage 1.8V */
 #else
@@ -2541,20 +2541,23 @@ APP_SEND_OP_COND_AGAIN:
 		usdhc_set_bus_width(base, USDHC_DATA_BUS_WIDTH_4BIT);
 	}
 
-	/* set sd card driver strength */
-	ret = usdhc_select_fun(priv, SD_GRP_DRIVER_STRENGTH_MODE,
-		priv->card_info.driver_strength);
-	if (ret) {
-		LOG_ERR("Set SD driver strehgth failed: %d\r\n", ret);
-		return ret;
-	}
+	if (priv->card_info.version >= SD_SPEC_VER3_0) {
 
-	/* set sd card current limit */
-	ret = usdhc_select_fun(priv, SD_GRP_CURRENT_LIMIT_MODE,
-		priv->card_info.max_current);
-	if (ret) {
-		LOG_ERR("Set SD current limit failed: %d\r\n", ret);
-		return ret;
+		/* set sd card driver strength */
+		ret = usdhc_select_fun(priv, SD_GRP_DRIVER_STRENGTH_MODE,
+			priv->card_info.driver_strength);
+		if (ret) {
+			LOG_ERR("Set SD driver strehgth failed: %d\r\n", ret);
+			return ret;
+		}
+
+		/* set sd card current limit */
+		ret = usdhc_select_fun(priv, SD_GRP_CURRENT_LIMIT_MODE,
+			priv->card_info.max_current);
+		if (ret) {
+			LOG_ERR("Set SD current limit failed: %d\r\n", ret);
+			return ret;
+		}
 	}
 
 	/* set block size */
@@ -2567,11 +2570,12 @@ APP_SEND_OP_COND_AGAIN:
 		return -EIO;
 	}
 
-	/* select bus timing */
-	ret = usdhc_select_bus_timing(priv);
-	if (ret) {
-		LOG_ERR("Select bus timing failed: %d\r\n", ret);
-		return ret;
+	if (priv->card_info.version > SD_SPEC_VER1_0) {
+		ret = usdhc_select_bus_timing(priv);
+		if (ret) {
+			LOG_ERR("Select bus timing failed: %d\r\n", ret);
+			return ret;
+		}
 	}
 
 	retry = 10;

@@ -85,6 +85,12 @@
 &lpuart8 {
 	status = "okay";
 	current-speed = <115200>;
+
+	esp8266 {
+		compatible = "espressif,esp";
+		label = "esp8266";
+		status = "okay";
+	};
 };
 
 &lpi2c1 {
@@ -152,4 +158,10 @@
 &usdhc1 {
 	status = "okay";
 	cd-gpios = <&gpio2 28 GPIO_ACTIVE_LOW>;
+};
+
+
+&csi {
+	status = "okay";
+	sensor-label = "OV7725";
 };

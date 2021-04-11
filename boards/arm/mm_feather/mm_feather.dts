@@ -72,7 +72,17 @@
 	current-speed = <115200>;
 };
 
+&lpuart3 {
+	status = "okay";
+	current-speed = <115200>;
+};
+
 &lpuart4 {
+	status = "okay";
+	current-speed = <115200>;
+};
+
+&lpuart8 {
 	status = "okay";
 	current-speed = <115200>;
 };
@@ -97,6 +107,10 @@
 	pcs-sck-delay = <2>;
 	sck-pcs-delay = <2>;
 	transfer-delay = <2>;
+};
+
+&flexpwm1_pwm3 {
+	status = "okay";
 };
 
 &flexpwm2_pwm0 {

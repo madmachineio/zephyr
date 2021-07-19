@@ -14,7 +14,7 @@ run on top of Zephyr. More information about the board can be found
 at:
 
 - `MadMachine Homepage`_
-- `API Reference`_
+- `SwiftIO API Reference`_
 
 .. image:: ./mm_feather.jpg
    :width: 720px
@@ -24,9 +24,29 @@ at:
 Hardware
 ********
 
-- i.MX RT1062 Cortex-M7 processor at 600MHz
-- 8MB QSPI Flash, 32MB SDRAM
-- User RGB LED, USB 2.0 Connector, microSD slot
+- MIMXRT1062DVL6B MCU (Cortex-M7 at 600MHz, 2048KB on-chip memory)
+
+- Memory
+   
+   - 8MB QSPI Flash
+   - 32MB SDRAM
+   - TF socket for SD card
+
+- USB
+
+   - USB-C 2.0 OTG connector
+
+- Power
+   
+   - 5V USB power
+   - 4.2V DC jack
+
+- Debug
+
+   - SWD connector
+
+
+- RGB LED
 
 
 Supported Features
@@ -178,11 +198,6 @@ Flashing
 
 Here is an example for the :ref:`hello_world` application.
 
-.. zephyr-app-commands::
-   :zephyr-app: samples/hello_world
-   :board: mm_feather
-   :goals: flash
-
 Connect a debuger from your PC to corresponding SWD pins of SwiftIO Feather.
 On Ubuntu, DAPLink debug probes appear on the host
 computer as a USB disk mounted to ``/media/<user>/DAPLink/``,
@@ -201,9 +216,6 @@ see the following message in the terminal:
 
    ***** Booting Zephyr OS v2.5.0 *****
    Hello World! mm_feather
-
-
-
 
 
 .. _MadMachine Homepage:

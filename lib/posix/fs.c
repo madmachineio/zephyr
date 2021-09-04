@@ -20,7 +20,7 @@ BUILD_ASSERT(PATH_MAX >= MAX_FILE_NAME, "PATH_MAX is less than MAX_FILE_NAME");
 struct posix_fs_desc {
 	union {
 		struct fs_file_t file;
-		struct fs_dir_t	dir;
+		struct fs_dir_t dir;
 	};
 	bool is_dir;
 	bool used;
@@ -122,6 +122,8 @@ int open(const char *name, int flags, ...)
 
 	return fd;
 }
+
+FUNC_ALIAS(open, _open, int);
 
 static int fs_close_vmeth(void *obj)
 {
@@ -292,6 +294,18 @@ struct dirent *readdir(DIR *dirp)
 	rc = (rc < MAX_FILE_NAME) ? rc : (MAX_FILE_NAME - 1);
 	(void)memcpy(pdirent.d_name, fdirent.name, rc);
 
+	switch (fdirent.type) {
+	case FS_DIR_ENTRY_DIR:
+		pdirent.d_type = DT_DIR;
+		break;
+	case FS_DIR_ENTRY_FILE:
+		pdirent.d_type = DT_REG;
+		break;
+	default:
+		pdirent.d_type = DT_UNKNOWN;
+		break;
+	}
+
 	/* Make sure the name is NULL terminated */
 	pdirent.d_name[rc] = '\0';
 	return &pdirent;
@@ -331,6 +345,8 @@ int unlink(const char *path)
 	}
 	return 0;
 }
+FUNC_ALIAS(unlink, _unlink, int);
+
 
 /**
  * @brief Get file status.

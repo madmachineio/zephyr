@@ -174,9 +174,12 @@ static int spi_mcux_configure(const struct device *dev,
 
 	master_config.baudRate = spi_cfg->frequency;
 
-	master_config.pcsToSckDelayInNanoSec = config->pcs_sck_delay;
-	master_config.lastSckToPcsDelayInNanoSec = config->sck_pcs_delay;
-	master_config.betweenTransferDelayInNanoSec = config->transfer_delay;
+	master_config.pcsToSckDelayInNanoSec =
+		Z_HZ_ns/spi_cfg->frequency*config->pcs_sck_delay;
+	master_config.lastSckToPcsDelayInNanoSec =
+		Z_HZ_ns/spi_cfg->frequency*config->sck_pcs_delay;
+	master_config.betweenTransferDelayInNanoSec =
+		Z_HZ_ns/spi_cfg->frequency*config->transfer_delay;
 
 	if (clock_control_get_rate(config->clock_dev, config->clock_subsys,
 				   &clock_freq)) {

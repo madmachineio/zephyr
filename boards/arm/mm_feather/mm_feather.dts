@@ -148,6 +148,14 @@
 	status = "okay";
 };
 
+&gpt1 {
+	status = "okay";
+};
+
+&gpt2 {
+	status = "okay";
+};
+
 &usb1 {
 	status = "okay";
 };

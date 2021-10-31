@@ -912,8 +912,8 @@ static int usdhc_data_xfer_cfg(struct usdhc_priv *priv,
 		}
 
 		/* check data inhibit flag */
-		if (base->PRES_STATE & USDHC_DATA_INHIBIT_FLAG)
-			return -EBUSY;
+		while (base->PRES_STATE & USDHC_DATA_INHIBIT_FLAG);
+			/* return -EBUSY; */
 		/* check transfer block count */
 		if ((data->block_count > USDHC_MAX_BLOCK_COUNT) ||
 			(!data->tx_data && !data->rx_data))

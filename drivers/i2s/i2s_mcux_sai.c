@@ -66,7 +66,6 @@ struct stream {
 
 struct i2s_mcux_config {
 	I2S_Type *base;
-	uint32_t clk_src;
 	uint32_t clk_pre_div;
 	uint32_t clk_src_div;
 	uint32_t clk_src;
@@ -78,7 +77,7 @@ struct i2s_mcux_config {
 	uint32_t mclk_pin_mask;
 	uint32_t mclk_pin_offset;
 	uint32_t tx_channel;
-	clock_control_subsys_t clk_sub_sys;
+	int32_t clk_sub_sys;
 	const struct device *ccm_dev;
 	const struct device *pinmux_dev;
 	void (*irq_connect)(const struct device *dev);
@@ -1100,8 +1099,8 @@ static const struct i2s_driver_api i2s_mcux_driver_api = {
 		.clk_src =						\
 			DT_CLOCKS_CELL_BY_IDX(DT_DRV_INST(i2s_id),	\
 				0, bits),				\
-		.clk_pre_div = DT_INST_PROP(i2s_id, pre_div);		\
-		.clk_src_div = DT_INST_PROP(i2s_id, podf);		\
+		.clk_pre_div = DT_INST_PROP(i2s_id, pre_div),		\
+		.clk_src_div = DT_INST_PROP(i2s_id, podf),		\
 		.pll_src =						\
 			DT_PHA_BY_NAME(DT_DRV_INST(i2s_id),		\
 				pll_clocks, src, value),		\
@@ -1117,20 +1116,11 @@ static const struct i2s_driver_api i2s_mcux_driver_api = {
 		.pll_den =						\
 			DT_PHA_BY_NAME(DT_DRV_INST(i2s_id),		\
 				pll_clocks, den, value),		\
-		.mclk_pin_mask =					\
-			DT_PHA_BY_IDX(DT_DRV_INST(i2s_id),		\
-				pinmuxes, 0, function),			\
-		.mclk_pin_offset =					\
-			DT_PHA_BY_IDX(DT_DRV_INST(i2s_id),		\
-				pinmuxs, 0, pin),			\
 		.clk_sub_sys =	(clock_control_subsys_t)		\
 			DT_CLOCKS_CELL_BY_IDX(DT_DRV_INST(i2s_id),	\
 				0, name),				\
 		.ccm_dev = DEVICE_DT_GET(				\
 				DT_CLOCKS_CTLR(DT_DRV_INST(i2s_id))),	\
-		.pinmux_dev = DEVICE_DT_GET(				\
-				DT_PHANDLE_BY_IDX(DT_DRV_INST(i2s_id),	\
-				pinmuxes, 0)),				\
 		.irq_connect = i2s_irq_connect_##i2s_id,		\
 		.tx_sync_mode =						\
 			   DT_INST_PROP(i2s_id, nxp_tx_sync_mode),	\

@@ -18,7 +18,6 @@
 #include <drivers/dma.h>
 
 #include <drivers/i2s.h>
-#include <drivers/pinmux.h>
 #include <drivers/clock_control.h>
 #include <dt-bindings/clock/imx_ccm.h>
 #include <soc.h>
@@ -69,7 +68,6 @@ struct i2s_mcux_config {
 	uint32_t clk_src;
 	uint32_t clk_pre_div;
 	uint32_t clk_src_div;
-	uint32_t clk_src;
 	uint32_t pll_src;
 	uint32_t pll_lp;
 	uint32_t pll_pd;
@@ -80,7 +78,6 @@ struct i2s_mcux_config {
 	uint32_t tx_channel;
 	clock_control_subsys_t clk_sub_sys;
 	const struct device *ccm_dev;
-	const struct device *pinmux_dev;
 	void (*irq_connect)(const struct device *dev);
 	bool rx_sync_mode;
 	bool tx_sync_mode;
@@ -329,25 +326,17 @@ static void i2s_dma_rx_callback(const struct device *dma_dev,
 static void enable_mclk_direction(const struct device *dev, bool dir)
 {
 	const struct i2s_mcux_config *dev_cfg = dev->config;
-	const struct device *iomuxgpr_dev = dev_cfg->pinmux_dev;
 	uint32_t offset = dev_cfg->mclk_pin_offset;
 	uint32_t mask = dev_cfg->mclk_pin_mask;
 	uint32_t value = 0;
+	uint32_t *gpr =  (uint32_t *)DT_REG_ADDR(DT_NODELABEL(iomuxcgpr)) + offset;
 
-	if (iomuxgpr_dev == NULL) {
-		LOG_ERR("fail to find pinmux controller\n");
-		return;
-	}
-
-	pinmux_pin_get(iomuxgpr_dev, offset, &value);
 	if (dir) {
-		/* enable MCLK output */
-		value |= mask;
+		*gpr |= mask;
 	} else {
-		/* disable MCLK output */
-		value &= ~mask;
+		*gpr &= ~mask;
 	}
-	pinmux_pin_set(iomuxgpr_dev, offset, value);
+
 }
 
 static void get_mclk_rate(const struct device *dev, uint32_t *mclk)
@@ -961,10 +950,11 @@ static void audio_clock_settings(const struct device *dev)
 {
 	clock_audio_pll_config_t audioPllConfig;
 	const struct i2s_mcux_config *dev_cfg = dev->config;
+	uint32_t clock_name = (uint32_t) dev_cfg->clk_sub_sys;
 
 	/*Clock setting for SAI*/
 #if CONFIG_CLOCK_CONTROL_MCUX_CCM_REV2
-	switch (dev_cfg->clk_sub_sys) {
+	switch (clock_name) {
 	case IMX_CCM_SAI1_CLK:
 		CLOCK_SetRootClockMux(kCLOCK_Root_Sai1, dev_cfg->clk_src);
 		CLOCK_SetRootClockDiv(kCLOCK_Root_Sai1, dev_cfg->clk_src_div);
@@ -988,7 +978,7 @@ static void audio_clock_settings(const struct device *dev)
 #endif
 
 #if CONFIG_CLOCK_CONTROL_MCUX_CCM
-	switch (dev_cfg->clk_sub_sys) {
+	switch (clock_name) {
 	case IMX_CCM_SAI1_CLK:
 		CLOCK_SetMux(kCLOCK_Sai1Mux, dev_cfg->clk_src);
 		CLOCK_SetDiv(kCLOCK_Sai1PreDiv, dev_cfg->clk_pre_div);
@@ -1100,8 +1090,8 @@ static const struct i2s_driver_api i2s_mcux_driver_api = {
 		.clk_src =						\
 			DT_CLOCKS_CELL_BY_IDX(DT_DRV_INST(i2s_id),	\
 				0, bits),				\
-		.clk_pre_div = DT_INST_PROP(i2s_id, pre_div);		\
-		.clk_src_div = DT_INST_PROP(i2s_id, podf);		\
+		.clk_pre_div = DT_INST_PROP(i2s_id, pre_div),		\
+		.clk_src_div = DT_INST_PROP(i2s_id, podf),		\
 		.pll_src =						\
 			DT_PHA_BY_NAME(DT_DRV_INST(i2s_id),		\
 				pll_clocks, src, value),		\
@@ -1122,15 +1112,10 @@ static const struct i2s_driver_api i2s_mcux_driver_api = {
 				pinmuxes, 0, function),			\
 		.mclk_pin_offset =					\
 			DT_PHA_BY_IDX(DT_DRV_INST(i2s_id),		\
-				pinmuxs, 0, pin),			\
+				pinmuxes, 0, pin),			\
 		.clk_sub_sys =	(clock_control_subsys_t)		\
-			DT_CLOCKS_CELL_BY_IDX(DT_DRV_INST(i2s_id),	\
-				0, name),				\
-		.ccm_dev = DEVICE_DT_GET(				\
-				DT_CLOCKS_CTLR(DT_DRV_INST(i2s_id))),	\
-		.pinmux_dev = DEVICE_DT_GET(				\
-				DT_PHANDLE_BY_IDX(DT_DRV_INST(i2s_id),	\
-				pinmuxes, 0)),				\
+			DT_INST_CLOCKS_CELL_BY_IDX(i2s_id, 0, name),	\
+		.ccm_dev = DEVICE_DT_GET(DT_INST_CLOCKS_CTLR(i2s_id)),	\
 		.irq_connect = i2s_irq_connect_##i2s_id,		\
 		.tx_sync_mode =						\
 			   DT_INST_PROP(i2s_id, nxp_tx_sync_mode),	\

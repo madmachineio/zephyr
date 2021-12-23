@@ -199,3 +199,7 @@
 		};
 	};
 };
+
+i2s_rxtx: &sai1 {
+	status = "okay";
+};

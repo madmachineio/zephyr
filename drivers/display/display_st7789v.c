@@ -343,7 +343,7 @@ static int st7789v_init(const struct device *dev)
 
 	data->spi_config.frequency =
 		DT_INST_PROP(0, spi_max_frequency);
-	data->spi_config.operation = SPI_OP_MODE_MASTER | SPI_WORD_SET(8);
+	data->spi_config.operation = SPI_OP_MODE_MASTER | SPI_WORD_SET(8) | SPI_MODE_CPOL;
 	data->spi_config.slave = DT_INST_REG_ADDR(0);
 
 #if DT_INST_SPI_DEV_HAS_CS_GPIOS(0)

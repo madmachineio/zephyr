@@ -178,7 +178,7 @@ static ALWAYS_INLINE void clock_init(void)
 
 #ifdef CONFIG_SPI_MCUX_LPSPI
 	CLOCK_SetMux(kCLOCK_LpspiMux, 1); /* Set SPI source to USB1 PFD0 720M */
-	CLOCK_SetDiv(kCLOCK_LpspiDiv, 7); /* Set SPI divider to 8 */
+	CLOCK_SetDiv(kCLOCK_LpspiDiv, 1); /* Set SPI divider to 8 */
 #endif
 
 #ifdef CONFIG_DISPLAY_MCUX_ELCDIF

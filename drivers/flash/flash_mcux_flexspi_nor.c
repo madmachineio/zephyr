@@ -41,6 +41,7 @@ enum {
 	EXIT_QPI,
 	READ_STATUS_REG,
 	ERASE_CHIP,
+	ERASE_BLOCK,
 };
 
 struct flash_flexspi_nor_config {
@@ -78,6 +79,11 @@ static const uint32_t flash_flexspi_nor_lut[][4] = {
 
 	[ERASE_SECTOR] = {
 		FLEXSPI_LUT_SEQ(kFLEXSPI_Command_SDR,       kFLEXSPI_1PAD, SPI_NOR_CMD_SE,
+				kFLEXSPI_Command_RADDR_SDR, kFLEXSPI_1PAD, 0x18),
+	},
+
+	[ERASE_BLOCK] = {
+		FLEXSPI_LUT_SEQ(kFLEXSPI_Command_SDR,       kFLEXSPI_1PAD, SPI_NOR_CMD_BE,
 				kFLEXSPI_Command_RADDR_SDR, kFLEXSPI_1PAD, 0x18),
 	},
 
@@ -246,6 +252,28 @@ static int flash_flexspi_nor_erase_sector(const struct device *dev,
 	return memc_flexspi_transfer(data->controller, &transfer);
 }
 
+static int flash_flexspi_nor_erase_block(const struct device *dev,
+	off_t offset)
+{
+	const struct flash_flexspi_nor_config *config = dev->config;
+	struct flash_flexspi_nor_data *data = dev->data;
+
+	flexspi_transfer_t transfer = {
+		.deviceAddress = offset,
+		.port = config->port,
+		.cmdType = kFLEXSPI_Command,
+		.SeqNumber = 1,
+		.seqIndex = ERASE_BLOCK,
+		.data = NULL,
+		.dataSize = 0,
+	};
+
+	LOG_DBG("Erasing block at 0x%08x", offset);
+
+	return memc_flexspi_transfer(data->controller, &transfer);
+}
+
+
 static int flash_flexspi_nor_erase_chip(const struct device *dev)
 {
 	const struct flash_flexspi_nor_config *config = dev->config;
@@ -413,7 +441,16 @@ static int flash_flexspi_nor_erase(const struct device *dev, off_t offset,
 		flash_flexspi_nor_erase_chip(dev);
 		flash_flexspi_nor_wait_bus_busy(dev);
 		memc_flexspi_reset(data->controller);
-	} else {
+	} else if((offset % SPI_NOR_BLOCK_SIZE) == 0 && (size % SPI_NOR_BLOCK_SIZE) == 0){
+		int num_blocks = size / SPI_NOR_BLOCK_SIZE;
+		for (i = 0; i < num_blocks; i++) {
+			flash_flexspi_nor_write_enable(dev);
+			flash_flexspi_nor_erase_block(dev, offset);
+			flash_flexspi_nor_wait_bus_busy(dev);
+			memc_flexspi_reset(data->controller);
+			offset += SPI_NOR_BLOCK_SIZE;
+		}
+	}else{
 		for (i = 0; i < num_sectors; i++) {
 			flash_flexspi_nor_write_enable(dev);
 			flash_flexspi_nor_erase_sector(dev, offset);

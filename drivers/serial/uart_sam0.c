@@ -186,7 +186,8 @@ static int uart_sam0_tx_halt(struct uart_sam0_dev_data *dev_data)
 
 static void uart_sam0_tx_timeout(struct k_work *work)
 {
-	struct uart_sam0_dev_data *dev_data = CONTAINER_OF(work,
+	struct k_work_delayable *dwork = k_work_delayable_from_work(work);
+	struct uart_sam0_dev_data *dev_data = CONTAINER_OF(dwork,
 							   struct uart_sam0_dev_data, tx_timeout_work);
 
 	uart_sam0_tx_halt(dev_data);
@@ -1256,7 +1257,7 @@ UART_SAM0_CONFIG_DEFN(n);						\
 DEVICE_DT_INST_DEFINE(n, uart_sam0_init, NULL,				\
 		    &uart_sam0_data_##n,				\
 		    &uart_sam0_config_##n, PRE_KERNEL_1,		\
-		    CONFIG_KERNEL_INIT_PRIORITY_DEVICE,			\
+		    CONFIG_SERIAL_INIT_PRIORITY,			\
 		    &uart_sam0_driver_api);				\
 UART_SAM0_IRQ_HANDLER(n)
 

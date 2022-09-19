@@ -1,7 +1,7 @@
 name: Bluetooth Tests
 
 on:
-  pull_request_target:
+  pull_request:
     paths:
       - "west.yml"
       - "subsys/bluetooth/**"
@@ -11,16 +11,16 @@ on:
       - "arch/posix/**"
 
 jobs:
-  bsim-build-cancel:
+  bluetooth-test-prep:
     runs-on: ubuntu-latest
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.6.0
         with:
           access_token: ${{ github.token }}
-  bsim-build:
+  bluetooth-test-build:
     runs-on: ubuntu-latest
-    needs: bsim-build-cancel
+    needs: bluetooth-test-prep
     container:
       image: zephyrprojectrtos/ci:v0.18.4
       options: '--entrypoint /bin/bash'
@@ -39,18 +39,15 @@ jobs:
 
       - name: checkout
         uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
 
       - name: west setup
         run: |
           west init -l . || true
-          west update
+          west config --global update.narrow true
+          west update 2>&1 1> west.update.log || west update 2>&1 1> west.update2.log
 
       - name: Run Bluetooth Tests with BSIM
         run: |
-          #source zephyr-env.sh
           export ZEPHYR_BASE=${PWD}
           WORK_DIR=${ZEPHYR_BASE}/bsim_bt_out tests/bluetooth/bsim_bt/compile.sh
           RESULTS_FILE=${ZEPHYR_BASE}/${bsim_bt_test_results_file} \
@@ -60,26 +57,15 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: Bluetooth Test Results
-          path: ./bsim_bt_out/bsim_results.xml
+          name: bluetooth-test-results
+          path: |
+            ./bsim_bt_out/bsim_results.xml
+            ${{ github.event_path }}
 
-  publish-test-results:
-    name: "Publish Unit Tests Results"
-    needs: bsim-build
-    runs-on: ubuntu-20.04
-      # the build-and-test job might be skipped, we don't need to run this job then
-    if: success() || failure()
-
-    steps:
-      - name: Download Artifacts
-        uses: actions/download-artifact@v2
+      - name: Upload Event Details
+        if: always()
+        uses: actions/upload-artifact@v2
         with:
-          path: artifacts
-
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1.12
-        with:
-          check_name: Bluetooth Test Results
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: "**/bsim_results.xml"
-          comment_on_pr: false
+          name: event
+          path: |
+            ${{ github.event_path }}

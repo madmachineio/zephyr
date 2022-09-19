@@ -133,7 +133,7 @@ static int malloc_prepare(const struct device *unused)
 	return 0;
 }
 
-SYS_INIT(malloc_prepare, APPLICATION, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);
+SYS_INIT(malloc_prepare, POST_KERNEL, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);
 
 /* Current offset from HEAP_BASE of unused memory */
 LIBC_BSS static size_t heap_sz;
@@ -552,5 +552,12 @@ void *_sbrk_r(struct _reent *r, int count)
 
 int _gettimeofday(struct timeval *__tp, void *__tzp)
 {
+#ifdef CONFIG_POSIX_API
 	return gettimeofday(__tp, __tzp);
+#else
+	/* Non-posix systems should not call gettimeofday() here as it will
+	 * result in a recursive call loop and result in a stack overflow.
+	 */
+	return -1;
+#endif
 }

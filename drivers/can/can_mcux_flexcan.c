@@ -253,13 +253,11 @@ static void mcux_flexcan_copy_zfilter_to_mbconfig(const struct zcan_filter *src,
 	if (src->id_type == CAN_STANDARD_IDENTIFIER) {
 		dest->format = kFLEXCAN_FrameFormatStandard;
 		dest->id = FLEXCAN_ID_STD(src->id);
-		*mask = FLEXCAN_RX_MB_STD_MASK(src->id_mask,
-					       src->rtr & src->rtr_mask, 1);
+		*mask = FLEXCAN_RX_MB_STD_MASK(src->id_mask, src->rtr_mask, 1);
 	} else {
 		dest->format = kFLEXCAN_FrameFormatExtend;
 		dest->id = FLEXCAN_ID_EXT(src->id);
-		*mask = FLEXCAN_RX_MB_EXT_MASK(src->id_mask,
-					       src->rtr & src->rtr_mask, 1);
+		*mask = FLEXCAN_RX_MB_EXT_MASK(src->id_mask, src->rtr_mask, 1);
 	}
 
 	if ((src->rtr & src->rtr_mask) == CAN_DATAFRAME) {
@@ -462,9 +460,9 @@ int mcux_flexcan_recover(const struct device *dev, k_timeout_t timeout)
 	start_time = k_uptime_ticks();
 	config->base->CTRL1 &= ~CAN_CTRL1_BOFFREC_MASK;
 
-	if (timeout != K_NO_WAIT) {
+	if (!K_TIMEOUT_EQ(timeout, K_NO_WAIT)) {
 		while (mcux_flexcan_get_state(dev, NULL) == CAN_BUS_OFF) {
-			if (timeout != K_FOREVER &&
+			if (!K_TIMEOUT_EQ(timeout, K_FOREVER) &&
 			    k_uptime_ticks() - start_time >= timeout.ticks) {
 				ret = CAN_TIMEOUT;
 			}
@@ -646,6 +644,7 @@ static inline void mcux_flexcan_transfer_rx_idle(const struct device *dev,
 static FLEXCAN_CALLBACK(mcux_flexcan_transfer_callback)
 {
 	struct mcux_flexcan_data *data = (struct mcux_flexcan_data *)userData;
+	const struct mcux_flexcan_config *config = data->dev->config;
 
 	switch (status) {
 	case kStatus_FLEXCAN_UnHandled:
@@ -654,6 +653,7 @@ static FLEXCAN_CALLBACK(mcux_flexcan_transfer_callback)
 		mcux_flexcan_transfer_error_status(data->dev, (uint64_t)result);
 		break;
 	case kStatus_FLEXCAN_TxSwitchToRx:
+		FLEXCAN_TransferAbortReceive(config->base, &data->handle, (uint64_t)result);
 		__fallthrough;
 	case kStatus_FLEXCAN_TxIdle:
 		/* The result field is a MB value which is limited to 32bit value */
@@ -747,19 +747,28 @@ static const struct can_driver_api mcux_flexcan_driver_api = {
 #endif
 	.register_state_change_isr = mcux_flexcan_register_state_change_isr,
 	.get_core_clock = mcux_flexcan_get_core_clock,
+	/*
+	 * FlexCAN timing limits are specified in the "FLEXCANx_CTRL1 field
+	 * descriptions" table in the SoC reference manual.
+	 *
+	 * Note that the values here are the "physical" timing limits, whereas
+	 * the register field limits are physical values minus 1 (which is
+	 * handled by the flexcan_config_t field assignments elsewhere in this
+	 * driver).
+	 */
 	.timing_min = {
-		.sjw = 0x1,
+		.sjw = 0x01,
 		.prop_seg = 0x01,
 		.phase_seg1 = 0x01,
-		.phase_seg2 = 0x01,
+		.phase_seg2 = 0x02,
 		.prescaler = 0x01
 	},
 	.timing_max = {
-		.sjw = 0x03,
-		.prop_seg = 0x07,
-		.phase_seg1 = 0x07,
-		.phase_seg2 = 0x07,
-		.prescaler = 0xFF
+		.sjw = 0x04,
+		.prop_seg = 0x08,
+		.phase_seg1 = 0x08,
+		.phase_seg2 = 0x08,
+		.prescaler = 0x100
 	}
 };
 

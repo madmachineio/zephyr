@@ -289,6 +289,7 @@ static void panic(const struct log_backend *const backend)
 	if (err == 0) {
 		shell->log_backend->control_block->state =
 						SHELL_LOG_BACKEND_PANIC;
+		z_flag_panic_mode_set(shell, true);
 
 		/* Move to the start of next line. */
 		z_shell_multiline_data_calc(&shell->ctx->vt100_ctx.cons,
@@ -318,7 +319,9 @@ static void dropped(const struct log_backend *const backend, uint32_t cnt)
 	const struct shell *shell = (const struct shell *)backend->cb->ctx;
 	const struct shell_log_backend *log_backend = shell->log_backend;
 
-	atomic_add(&shell->stats->log_lost_cnt, cnt);
+	if (IS_ENABLED(CONFIG_SHELL_STATS)) {
+		atomic_add(&shell->stats->log_lost_cnt, cnt);
+	}
 	atomic_add(&log_backend->control_block->dropped_cnt, cnt);
 }
 

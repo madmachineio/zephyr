@@ -97,7 +97,7 @@ void *thread_top_exec(void *p1)
 		 * scheduled and wait on cvar0.
 		 */
 		if (!(id == 0 && i == 0)) {
-			pthread_cond_wait(&cvar0, &lock);
+			zassert_equal(0, pthread_cond_wait(&cvar0, &lock), "");
 		} else {
 			pthread_mutex_unlock(&lock);
 			usleep(USEC_PER_MSEC * 500U);
@@ -559,4 +559,21 @@ void test_posix_pthread_create_negative(void)
 	pthread_attr_setstack(&attr1, &stack_1, 0);
 	ret = pthread_create(&pthread1, &attr1, create_thread1, (void *)1);
 	zassert_equal(ret, EINVAL, "create thread with 0 size");
+}
+
+void test_pthread_descriptor_leak(void)
+{
+	void *unused;
+	pthread_t pthread1;
+	pthread_attr_t attr;
+
+	zassert_ok(pthread_attr_init(&attr), NULL);
+	zassert_ok(pthread_attr_setstack(&attr, &stack_e[0][0], STACKS), NULL);
+
+	/* If we are leaking descriptors, then this loop will never complete */
+	for (size_t i = 0; i < CONFIG_MAX_PTHREAD_COUNT * 2; ++i) {
+		zassert_ok(pthread_create(&pthread1, &attr, create_thread1, NULL),
+			   "unable to create thread %zu", i);
+		zassert_ok(pthread_join(pthread1, &unused), "unable to join thread %zu", i);
+	}
 }

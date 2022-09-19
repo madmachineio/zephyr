@@ -137,11 +137,6 @@
 			(_conn)->send_data_retries);                           \
 	})
 
-#define TCPOPT_END	0
-#define TCPOPT_NOP	1
-#define TCPOPT_MAXSEG	2
-#define TCPOPT_WINDOW	3
-
 enum pkt_addr {
 	TCP_EP_SRC = 1,
 	TCP_EP_DST = 0
@@ -202,6 +197,18 @@ union tcp_endpoint {
 	struct sockaddr_in6 sin6;
 };
 
+/* TCP Option codes */
+#define NET_TCP_END_OPT          0
+#define NET_TCP_NOP_OPT          1
+#define NET_TCP_MSS_OPT          2
+#define NET_TCP_WINDOW_SCALE_OPT 3
+
+/* TCP Option sizes */
+#define NET_TCP_END_SIZE          1
+#define NET_TCP_NOP_SIZE          1
+#define NET_TCP_MSS_SIZE          4
+#define NET_TCP_WINDOW_SCALE_SIZE 3
+
 struct tcp_options {
 	uint16_t mss;
 	uint16_t window;
@@ -225,6 +232,7 @@ struct tcp { /* TCP connection */
 	struct k_sem connect_sem; /* semaphore for blocking connect */
 	struct k_fifo recv_data;  /* temp queue before passing data to app */
 	struct tcp_options recv_options;
+	struct tcp_options send_options;
 	struct k_work_delayable send_timer;
 	struct k_work_delayable recv_queue_timer;
 	struct k_work_delayable send_data_timer;

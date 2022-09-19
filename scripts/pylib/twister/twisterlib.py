@@ -773,6 +773,8 @@ class DeviceHandler(Handler):
                         command_extra_args.append("cmsis_dap_serial %s" % (board_id))
                     elif runner == "jlink":
                         command.append("--tool-opt=-SelectEmuBySN  %s" % (board_id))
+                    elif runner == "stm32cubeprogrammer":
+                        command.append("--tool-opt=sn=%s" % (board_id))
 
             if command_extra_args != []:
                 command.append('--')
@@ -2033,9 +2035,6 @@ class CMake():
             f'-DEXTRA_GEN_DEFINES_ARGS={gen_defines_args}',
             f'-G{self.generator}'
         ]
-
-        if self.cmake_only:
-            cmake_args.append("-DCMAKE_EXPORT_COMPILE_COMMANDS=1")
 
         args = ["-D{}".format(a.replace('"', '')) for a in args]
         cmake_args.extend(args)

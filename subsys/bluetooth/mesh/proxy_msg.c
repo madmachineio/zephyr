@@ -51,10 +51,11 @@
 static void proxy_sar_timeout(struct k_work *work)
 {
 	struct bt_mesh_proxy_role *role;
+	struct k_work_delayable *dwork = k_work_delayable_from_work(work);
 
 	BT_WARN("Proxy SAR timeout");
 
-	role = CONTAINER_OF(work, struct bt_mesh_proxy_role, sar_timer);
+	role = CONTAINER_OF(dwork, struct bt_mesh_proxy_role, sar_timer);
 	if (role->conn) {
 		bt_conn_disconnect(role->conn,
 				   BT_HCI_ERR_REMOTE_USER_TERM_CONN);
@@ -221,7 +222,7 @@ int bt_mesh_proxy_msg_send(struct bt_mesh_proxy_role *role, uint8_t type,
 	net_buf_simple_pull(msg, mtu);
 
 	while (msg->len) {
-		if (msg->len + 1 < mtu) {
+		if (msg->len + 1 <= mtu) {
 			net_buf_simple_push_u8(msg, PDU_HDR(SAR_LAST, type));
 			err = role->cb.send(conn, msg->data, msg->len, end, user_data);
 			if (err) {

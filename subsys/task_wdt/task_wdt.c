@@ -50,7 +50,7 @@ static int hw_wdt_channel;
 static bool hw_wdt_started;
 #endif
 
-static void schedule_next_timeout(uint32_t current_ticks)
+static void schedule_next_timeout(int64_t current_ticks)
 {
 	int next_channel_id;	/* channel which will time out next */
 	int64_t next_timeout;   /* timeout in absolute ticks of this channel */
@@ -160,7 +160,6 @@ int task_wdt_add(uint32_t reload_period, task_wdt_callback_t callback,
 			channels[id].user_data = user_data;
 			channels[id].timeout_abs_ticks = K_TICKS_FOREVER;
 			channels[id].callback = callback;
-			task_wdt_feed(id);
 
 #ifdef CONFIG_TASK_WDT_HW_FALLBACK
 			if (!hw_wdt_started && hw_wdt_dev) {
@@ -170,6 +169,9 @@ int task_wdt_add(uint32_t reload_period, task_wdt_callback_t callback,
 				hw_wdt_started = true;
 			}
 #endif
+			/* must be called after hw wdt has been started */
+			task_wdt_feed(id);
+
 			return id;
 		}
 	}

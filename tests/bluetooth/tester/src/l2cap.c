@@ -35,6 +35,7 @@ static struct channel {
 	uint8_t chan_id; /* Internal number that identifies L2CAP channel. */
 	struct bt_l2cap_le_chan le;
 	bool in_use;
+	bool hold_credit;
 	struct net_buf *pending_credit;
 } channels[CHANNELS];
 
@@ -60,7 +61,7 @@ static int recv_cb(struct bt_l2cap_chan *l2cap_chan, struct net_buf *buf)
 	tester_send(BTP_SERVICE_ID_L2CAP, L2CAP_EV_DATA_RECEIVED,
 		    CONTROLLER_INDEX, recv_cb_buf, sizeof(*ev) + buf->len);
 
-	if (!chan->pending_credit) {
+	if (chan->hold_credit && !chan->pending_credit) {
 		/* no need for extra ref, as when returning EINPROGRESS user
 		 * becomes owner of the netbuf
 		 */
@@ -132,6 +133,8 @@ static void disconnected_cb(struct bt_l2cap_chan *l2cap_chan)
 		}
 	}
 
+	chan->in_use = false;
+
 	tester_send(BTP_SERVICE_ID_L2CAP, L2CAP_EV_DISCONNECTED,
 		    CONTROLLER_INDEX, (uint8_t *) &ev, sizeof(ev));
 }
@@ -141,7 +144,7 @@ static void reconfigured_cb(struct bt_l2cap_chan *l2cap_chan)
 	struct l2cap_reconfigured_ev ev;
 	struct channel *chan = CONTAINER_OF(l2cap_chan, struct channel, le);
 
-	(void)memset(&ev, 0, sizeof(struct l2cap_disconnected_ev));
+	(void)memset(&ev, 0, sizeof(ev));
 
 	ev.chan_id = chan->chan_id;
 	ev.mtu_remote = sys_cpu_to_le16(chan->le.tx.mtu);
@@ -195,9 +198,10 @@ static void connect(uint8_t *data, uint16_t len)
 	uint16_t mtu = sys_le16_to_cpu(cmd->mtu);
 	uint8_t buf[sizeof(*rp) + CHANNELS];
 	uint8_t i = 0;
+	bool ecfc = cmd->options & L2CAP_CONNECT_OPT_ECFC;
 	int err;
 
-	if (cmd->num > CHANNELS || mtu > DATA_MTU_INITIAL) {
+	if (cmd->num == 0 || cmd->num > CHANNELS || mtu > DATA_MTU_INITIAL) {
 		goto fail;
 	}
 
@@ -217,20 +221,24 @@ static void connect(uint8_t *data, uint16_t len)
 		chan->le.rx.mtu = mtu;
 		rp->chan_id[i] = chan->chan_id;
 		allocated_channels[i] = &chan->le.chan;
+
+		chan->hold_credit = cmd->options & L2CAP_CONNECT_OPT_HOLD_CREDIT;
 	}
 
-	if (cmd->num == 1 && cmd->ecfc == 0) {
+	if (cmd->num == 1 && !ecfc) {
 		err = bt_l2cap_chan_connect(conn, &chan->le.chan, cmd->psm);
 		if (err < 0) {
 			goto fail;
 		}
-	} else if (cmd->ecfc == 1) {
+	} else if (ecfc) {
 #if defined(CONFIG_BT_L2CAP_ECRED)
 		err = bt_l2cap_ecred_chan_connect(conn, allocated_channels,
 							cmd->psm);
 		if (err < 0) {
 			goto fail;
 		}
+#else
+		goto fail;
 #endif
 	} else {
 		LOG_ERR("Invalid 'num' parameter value");
@@ -336,22 +344,22 @@ void disconnect_eatt_chans(uint8_t *data, uint16_t len)
 	if (!conn) {
 		LOG_ERR("Unknown connection");
 		status = BTP_STATUS_FAILED;
-		goto rsp;
+		goto failed;
 	}
 
 	for (int i = 0; i < cmd->count; i++) {
 		err = bt_eatt_disconnect_one(conn);
 		if (err) {
 			status = BTP_STATUS_FAILED;
-			goto rsp;
+			goto unref;
 		}
 	}
 
 	status = BTP_STATUS_SUCCESS;
 
-rsp:
+unref:
 	bt_conn_unref(conn);
-
+failed:
 	tester_rsp(BTP_SERVICE_ID_L2CAP, L2CAP_DISCONNECT_EATT_CHANS,
 		   CONTROLLER_INDEX, status);
 }
@@ -427,17 +435,17 @@ static int accept(struct bt_conn *conn, struct bt_l2cap_chan **l2cap_chan)
 {
 	struct channel *chan;
 
+	if (bt_conn_enc_key_size(conn) < req_keysize) {
+		return -EPERM;
+	}
+
+	if (authorize_flag) {
+		return -EACCES;
+	}
+
 	chan = get_free_channel();
 	if (!chan) {
 		return -ENOMEM;
-	}
-
-	if (bt_conn_enc_key_size(conn) < req_keysize) {
-		req_keysize = 0;
-		return -EPERM;
-	} else if (authorize_flag) {
-		authorize_flag = false;
-		return -EACCES;
 	}
 
 	chan->le.chan.ops = &l2cap_ops;
@@ -456,6 +464,10 @@ static void listen(uint8_t *data, uint16_t len)
 	/* TODO: Handle cmd->transport flag */
 
 	if (!is_free_psm(cmd->psm)) {
+		goto fail;
+	}
+
+	if (cmd->psm == 0) {
 		goto fail;
 	}
 

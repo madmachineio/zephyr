@@ -430,6 +430,8 @@ static enum bt_security_err security_err_get(uint8_t smp_err)
 		return BT_SECURITY_ERR_PAIR_NOT_ALLOWED;
 	case BT_SMP_ERR_INVALID_PARAMS:
 		return BT_SECURITY_ERR_INVALID_PARAM;
+	case BT_SMP_ERR_KEY_REJECTED:
+		return BT_SECURITY_ERR_KEY_REJECTED;
 	case BT_SMP_ERR_UNSPECIFIED:
 	default:
 		return BT_SECURITY_ERR_UNSPECIFIED;
@@ -1020,7 +1022,8 @@ static void smp_pairing_br_complete(struct bt_smp_br *smp, uint8_t status)
 
 static void smp_br_timeout(struct k_work *work)
 {
-	struct bt_smp_br *smp = CONTAINER_OF(work, struct bt_smp_br, work);
+	struct k_work_delayable *dwork = k_work_delayable_from_work(work);
+	struct bt_smp_br *smp = CONTAINER_OF(dwork, struct bt_smp_br, work);
 
 	BT_ERR("SMP Timeout");
 

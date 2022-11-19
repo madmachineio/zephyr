@@ -2572,8 +2572,14 @@ static int tls_sock_bind_vmeth(void *obj, const struct sockaddr *addr,
 static int tls_sock_connect_vmeth(void *obj, const struct sockaddr *addr,
 				  socklen_t addrlen)
 {
-	LOG_ERR("address len %d", addrlen);
-	LOG_HEXDUMP_ERR((char*)addr, addrlen, "dump connect address: ");
+	printf("address len %d\n", addrlen);
+	printf("dump connect address: ");
+	char *data = addr;
+	for(int i=0; i<addrlen; i++ ){
+		printf("%x ", data[i]);
+	}
+	printf("\n");
+	//LOG_HEXDUMP_ERR((char*)addr, addrlen, "dump connect address: ");
 	return ztls_connect_ctx(obj, addr, addrlen);
 }
 

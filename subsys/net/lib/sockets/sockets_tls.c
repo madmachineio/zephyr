@@ -1030,7 +1030,7 @@ static int tls_opt_sec_tag_list_set(struct tls_context *context,
 	if (optlen % sizeof(sec_tag_t) != 0) {
 		return -EINVAL;
 	}
-
+	printf("sec tag list len %d\n", optlen);
 	sec_tag_cnt = optlen / sizeof(sec_tag_t);
 	if (sec_tag_cnt >
 		ARRAY_SIZE(context->options.sec_tag_list.sec_tags)) {
@@ -1039,6 +1039,8 @@ static int tls_opt_sec_tag_list_set(struct tls_context *context,
 
 	memcpy(context->options.sec_tag_list.sec_tags, optval, optlen);
 	context->options.sec_tag_list.sec_tag_count = sec_tag_cnt;
+
+	printf("sec tag [0] %d, total %d\n", context->options.sec_tag_list.sec_tags[0], sec_tag_cnt);
 
 	return 0;
 }
@@ -1081,6 +1083,7 @@ static int tls_opt_hostname_set(struct tls_context *context,
 	ARG_UNUSED(optlen);
 
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
+	printf("ssl set host name %s\n", (char*)optval);
 	if (mbedtls_ssl_set_hostname(&context->ssl, optval) != 0) {
 		return -EINVAL;
 	}
@@ -2569,6 +2572,8 @@ static int tls_sock_bind_vmeth(void *obj, const struct sockaddr *addr,
 static int tls_sock_connect_vmeth(void *obj, const struct sockaddr *addr,
 				  socklen_t addrlen)
 {
+	LOG_ERR("address len %d", addrlen);
+	LOG_HEXDUMP_ERR((char*)addr, addrlen, "dump connect address: ");
 	return ztls_connect_ctx(obj, addr, addrlen);
 }
 

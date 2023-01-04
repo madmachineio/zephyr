@@ -162,6 +162,7 @@ static int mcux_lpi2c_transfer(const struct device *dev, struct i2c_msg *msgs,
 		 */
 		if (status != kStatus_Success) {
 			LPI2C_MasterTransferAbort(base, &data->handle);
+			printf("LPI2C_MasterTransferNonBlocking fail status %d\n", status);
 			ret = -EIO;
 			break;
 		}
@@ -174,6 +175,7 @@ static int mcux_lpi2c_transfer(const struct device *dev, struct i2c_msg *msgs,
 		 */
 		if (data->callback_status != kStatus_Success) {
 			LPI2C_MasterTransferAbort(base, &data->handle);
+			printf("callback_status fail status %d\n", data->callback_status);
 			ret = -EIO;
 			break;
 		}
@@ -181,6 +183,7 @@ static int mcux_lpi2c_transfer(const struct device *dev, struct i2c_msg *msgs,
 			k_busy_wait(SCAN_DELAY_US(config->bitrate));
 			if (0 != (base->MSR & LPI2C_MSR_NDF_MASK)) {
 				LPI2C_MasterTransferAbort(base, &data->handle);
+				printf("base->MSR fail status %x\n", base->MSR);
 				ret = -EIO;
 				break;
 			}

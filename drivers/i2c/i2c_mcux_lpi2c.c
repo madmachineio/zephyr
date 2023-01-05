@@ -162,7 +162,8 @@ static int mcux_lpi2c_transfer(const struct device *dev, struct i2c_msg *msgs,
 		 */
 		if (status != kStatus_Success) {
 			LPI2C_MasterTransferAbort(base, &data->handle);
-			printf("LPI2C_MasterTransferNonBlocking fail status %d\n", status);
+			printf("LPI2C_MasterTransferNonBlocking fail status %d base->MSR %x idle status %d\n", 
+				status, base->MSR, data->handle.state);
 			ret = -EIO;
 			break;
 		}

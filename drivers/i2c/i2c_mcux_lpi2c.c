@@ -225,6 +225,8 @@ static int mcux_lpi2c_init(const struct device *dev)
 
 	LPI2C_MasterGetDefaultConfig(&master_config);
 	master_config.busIdleTimeout_ns = config->bus_idle_timeout_ns;
+	master_config.sclGlitchFilterWidth_ns = 400;
+	master_config.sdaGlitchFilterWidth_ns = 400;
 	LPI2C_MasterInit(base, &master_config, clock_freq);
 	LPI2C_MasterTransferCreateHandle(base, &data->handle,
 					 mcux_lpi2c_master_transfer_callback,

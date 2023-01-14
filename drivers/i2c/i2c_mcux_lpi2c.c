@@ -20,6 +20,7 @@ LOG_MODULE_REGISTER(mcux_lpi2c);
  * address scan.  (10 appears sufficient, 20% safety factor.)
  */
 #define SCAN_DELAY_US(baudrate) (12 * USEC_PER_SEC / baudrate)
+#define GLITCH_FILTER_WIDTH	400
 
 struct mcux_lpi2c_config {
 	LPI2C_Type *base;
@@ -221,6 +222,8 @@ static int mcux_lpi2c_init(const struct device *dev)
 
 	LPI2C_MasterGetDefaultConfig(&master_config);
 	master_config.busIdleTimeout_ns = config->bus_idle_timeout_ns;
+	master_config.sclGlitchFilterWidth_ns = GLITCH_FILTER_WIDTH;
+	master_config.sdaGlitchFilterWidth_ns = GLITCH_FILTER_WIDTH;
 	LPI2C_MasterInit(base, &master_config, clock_freq);
 	LPI2C_MasterTransferCreateHandle(base, &data->handle,
 					 mcux_lpi2c_master_transfer_callback,

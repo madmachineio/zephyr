@@ -25,7 +25,7 @@ const struct flexspi_nor_config_t Qspiflash_config = {
 		.csSetupTime = 3u,
 		.sflashPadType = kSerialFlash_4Pads,
 		.serialClkFreq = kFlexSpiSerialClk_100MHz,
-		.sflashA1Size = 8u * 1024u * 1024u,
+		.sflashA1Size = 16u * 1024u * 1024u,
 		.lookupTable = {
 			FLEXSPI_LUT_SEQ(CMD_SDR, FLEXSPI_1PAD,
 					0xEB, RADDR_SDR,

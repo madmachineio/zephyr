@@ -53,11 +53,11 @@
 
 
 &flexspi {
-	reg = <0x402a8000 0x4000>, <0x60000000 DT_SIZE_M(8)>;
-	is25wp064: is25wp064@0 {
+	reg = <0x402a8000 0x4000>, <0x60000000 DT_SIZE_M(16)>;
+	is25wp128: is25wp128@0 {
 		compatible = "nxp,imx-flexspi-nor";
-		size = <67108864>;
-		label = "IS25WP064";
+		size = <134217728>;
+		label = "IS25WP128";
 		reg = <0>;
 		spi-max-frequency = <133000000>;
 		status = "okay";

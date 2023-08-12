@@ -916,8 +916,15 @@ static int usdhc_data_xfer_cfg(struct usdhc_priv *priv,
 			/* return -EBUSY; */
 		/* check transfer block count */
 		if ((data->block_count > USDHC_MAX_BLOCK_COUNT) ||
-			(!data->tx_data && !data->rx_data))
-			return -EINVAL;
+			(!data->tx_data && !data->rx_data)){
+
+				printk("%s %d en_dma %d, block_count %d(%d) tx %p rx %p\r\n", __FILE__, __LINE__,
+																	en_dma,
+																	data->block_count, USDHC_MAX_BLOCK_COUNT,
+																	data->tx_data, data->rx_data);
+				return -EINVAL;
+			}
+
 
 		/* config mix parameter */
 		mix_ctrl &= ~(USDHC_MIX_CTRL_MSBSEL_MASK |
@@ -1244,9 +1251,12 @@ static int usdhc_read_data_port_sync(struct usdhc_priv *priv)
 			base->INT_STATUS = USDHC_INT_TUNING_ERR_FLAG;
 			/* if tuning error occur ,return directly */
 			error = -EIO;
+			if(error)printk("%s %d error %d\r\n", __FILE__, __LINE__, error);
 		} else if ((int_status & USDHC_INT_DATA_ERR_FLAG)) {
 			if (!(data->ignore_err))
 				error = -EIO;
+			if(error)printk("%s %d error %d\r\n", __FILE__, __LINE__, error);
+			printk("clean USDHC_INT_DATA_ERR_FLAG %x\r\n", int_status);
 			/* clear data error flag */
 			base->INT_STATUS = USDHC_INT_DATA_ERR_FLAG;
 		}
@@ -1261,7 +1271,7 @@ static int usdhc_read_data_port_sync(struct usdhc_priv *priv)
 
 	/* Clear data complete flag after the last read operation. */
 	base->INT_STATUS = USDHC_INT_DATA_DONE_FLAG;
-
+	if(error)printk("%s %d error %d\r\n", __FILE__, __LINE__, error);
 	return error;
 }
 
@@ -1383,12 +1393,14 @@ static int usdhc_data_sync_xfer(struct usdhc_priv *priv, bool en_dma)
 
 		if (int_status & USDHC_INT_TUNING_ERR_FLAG) {
 			error = -EIO;
+			if(error)printk("%s %d error %d\r\n", __FILE__, __LINE__, error);
 		} else if ((int_status & (USDHC_INT_DATA_ERR_FLAG |
 			USDHC_INT_DMA_ERR_FLAG))) {
 			if ((!(data->ignore_err)) ||
 				(int_status &
 				USDHC_INT_DATA_TIMEOUT_FLAG)) {
 				error = -EIO;
+				if(error)printk("%s %d error %d\r\n", __FILE__, __LINE__, error);
 			}
 		}
 		/* load dummy data */
@@ -1403,8 +1415,10 @@ static int usdhc_data_sync_xfer(struct usdhc_priv *priv, bool en_dma)
 	} else {
 		if (data->rx_data) {
 			error = usdhc_read_data_port_sync(priv);
+			if(error)printk("%s %d error %d\r\n", __FILE__, __LINE__, error);
 		} else {
 			error = usdhc_write_data_port_sync(priv);
+			if(error)printk("%s %d error %d\r\n", __FILE__, __LINE__, error);
 		}
 	}
 	return error;
@@ -1437,10 +1451,11 @@ static int usdhc_xfer(struct usdhc_priv *priv)
 	 * (no DMA, ADMA1, ADMA2).
 	 */
 
-	if (data && (!execute_tuning) && priv->op_context.dma_cfg.adma_table)
+	if (data && (!execute_tuning) && priv->op_context.dma_cfg.adma_table){
 		error = usdhc_adma_table_cfg(priv,
 			(data->data_type & USDHC_XFER_BOOT) ?
 			USDHC_ADMA_MUTI_FLAG : USDHC_ADMA_SINGLE_FLAG);
+		}
 
 	/* if the DMA descriptor configure fail or not needed , disable it */
 	if (error) {
@@ -1452,8 +1467,10 @@ static int usdhc_xfer(struct usdhc_priv *priv)
 
 	/* config the data transfer parameter */
 	error = usdhc_data_xfer_cfg(priv, en_dma);
-	if (error)
+	if (error){
+		printk("%s %d error %d\r\n", __FILE__, __LINE__, error);
 		return error;
+	}
 	/* send command first */
 	usdhc_send_cmd(base, &priv->op_context.cmd);
 	/* wait command done */
@@ -1463,7 +1480,7 @@ static int usdhc_xfer(struct usdhc_priv *priv)
 	if (data && (!error)) {
 		return usdhc_data_sync_xfer(priv, en_dma);
 	}
-
+	if(error)printk("%s %d error %d\r\n", __FILE__, __LINE__, error);
 	return error;
 }
 
@@ -1905,6 +1922,8 @@ static int usdhc_select_bus_timing(struct usdhc_priv *priv)
 
 	if (priv->card_info.voltage != SD_VOL_1_8_V) {
 		/* Switch the card to high speed mode */
+		printk("keep 25M\r\n");
+		return 0;
 		if (priv->host_capability.host_flags &
 			USDHC_SUPPORT_HIGHSPEED_FLAG) {
 			/* group 1, function 1 ->high speed mode*/
@@ -1917,6 +1936,7 @@ static int usdhc_select_bus_timing(struct usdhc_priv *priv)
 			 * mode". Return failed status.
 			 */
 			if (!error) {
+				printk("select 50M\r\n");
 				priv->card_info.sd_timing =
 					SD_TIMING_SDR25_HIGH_SPEED_MODE;
 				priv->card_info.busclk_hz =
@@ -1927,12 +1947,14 @@ static int usdhc_select_bus_timing(struct usdhc_priv *priv)
 				/* if not support high speed,
 				 * keep the card work at default mode
 				 */
+				printk("select fail keep 25M\r\n");
 				return 0;
 			}
 		} else {
 			/* if not support high speed,
 			 * keep the card work at default mode
 			 */
+			printk("no support high speed keep 25M\r\n");
 			return 0;
 		}
 	} else if ((USDHC_SUPPORT_SDR104_FLAG !=
@@ -2732,6 +2754,7 @@ static int disk_usdhc_access_read(struct disk_info *disk, uint8_t *buf,
 
 	LOG_DBG("sector=%u count=%u", sector, count);
 
+	if(!buf)printk("%s %d buf NULL\r\n", __FILE__, __LINE__);
 	return usdhc_read_sector(priv, buf, sector, count);
 }
 

@@ -727,6 +727,27 @@ static void usdhc_millsec_delay(unsigned int cycles_to_wait)
 uint32_t g_usdhc_boot_dummy __aligned(64);
 uint32_t g_usdhc_rx_dummy[2048] __aligned(64);
 
+static bool usdhc_hw_skip_timing_select(void)
+{
+	#define ROM_VERSION(_maj, _min, _p)	(((_maj << 16) & 0xFF0000) | ((_min << 8) & 0xFF00) | (_p & 0xFF))
+  
+	uint32_t no_support_list[]={
+		ROM_VERSION(1,3,0),
+	};
+	uint32_t rom_version = 0;
+	memcpy((char*)&rom_version, (char*)0x60002400, sizeof(uint32_t));
+
+	for(int i=0; i<sizeof(no_support_list)/sizeof(uint32_t); i++){
+		if(rom_version == no_support_list[i]){
+			
+			LOG_INF("no-select");
+			return true;
+		}
+	}
+	LOG_INF("select");
+	return false;
+}
+
 static int usdhc_adma2_descriptor_cfg(
 	uint32_t *adma_table, uint32_t adma_table_words,
 	const uint32_t *data_addr, uint32_t data_size, uint32_t flags)
@@ -2568,7 +2589,9 @@ APP_SEND_OP_COND_AGAIN:
 		return -EIO;
 	}
 
-	if (priv->card_info.version > SD_SPEC_VER1_0) {
+	bool skip_select = usdhc_hw_skip_timing_select();
+
+	if (priv->card_info.version > SD_SPEC_VER1_0 && skip_select == false) {
 		/* select bus timing */
 		ret = usdhc_select_bus_timing(priv);
 		if (ret) {

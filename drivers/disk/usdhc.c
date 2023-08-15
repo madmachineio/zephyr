@@ -729,7 +729,7 @@ uint32_t g_usdhc_rx_dummy[2048] __aligned(64);
 
 static bool usdhc_hw_skip_timing_select(void)
 {
-	#define ROM_VERSION(_maj, _min, _p)	(((_maj << 16) & 0xFF0000) | ((_min << 8) & 0xFF00) | (_p & 0xFF))
+	#define ROM_VERSION(_maj, _min, _p)	(((_maj << 16) & 0xFF0000) | ((_min << 8) & 0xFF00) | (_p & 0x00))
   
 	uint32_t no_support_list[]={
 		ROM_VERSION(1,3,0),
@@ -737,14 +737,15 @@ static bool usdhc_hw_skip_timing_select(void)
 	uint32_t rom_version = 0;
 	memcpy((char*)&rom_version, (char*)0x60002400, sizeof(uint32_t));
 
+	rom_version &= 0xFFFF00;
+
 	for(int i=0; i<sizeof(no_support_list)/sizeof(uint32_t); i++){
 		if(rom_version == no_support_list[i]){
-			
-			LOG_INF("no-select");
+			LOG_DBG("SD doesn't select 50MHz");
 			return true;
 		}
 	}
-	LOG_INF("select");
+	LOG_DBG("SD selects 50MHz");
 	return false;
 }
 

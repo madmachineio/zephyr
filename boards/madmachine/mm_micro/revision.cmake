@@ -1,0 +1,7 @@
+if (NOT DEFINED BOARD_REVISION)
+  set(BOARD_REVISION "basic")
+else ()
+  if (NOT (BOARD_REVISION STREQUAL "basic") AND NOT (BOARD_REVISION STREQUAL "swiftio"))
+    message(FATAL_ERROR "Invalid board revision, ${BOARD_REVISION}, valid revisions are: basic, swiftio")
+  endif()
+endif()

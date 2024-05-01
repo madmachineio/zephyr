@@ -1,0 +1,6 @@
+/ {
+	chosen {
+		zephyr,flash = &sdram0;
+	};
+
+};

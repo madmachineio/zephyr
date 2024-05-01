@@ -1,0 +1,11 @@
+board:
+  name: mm_micro
+  vendor: madmachine
+  revision:
+    format: "custom"
+    default: "basic"
+    revisions:
+      - name: "basic"
+      - name: "swiftio"
+  socs:
+    - name: mimxrt1062

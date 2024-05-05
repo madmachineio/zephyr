@@ -1,0 +1,8 @@
+/ {
+	chosen {
+		zephyr,flash = &sdram0;
+		zephyr,console = &lpuart2;
+		zephyr,shell-uart = &lpuart2;
+	};
+
+};

@@ -7,5 +7,6 @@ board:
     revisions:
       - name: "basic"
       - name: "swiftio"
+      - name: "playground"
   socs:
     - name: mimxrt1062

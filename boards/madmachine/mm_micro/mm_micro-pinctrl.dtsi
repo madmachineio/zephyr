@@ -59,6 +59,33 @@
 		};
 	};
 
+	pinmux_lpuart2: pinmux_lpuart2 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_03_lpuart2_rx>,
+				<&iomuxc_gpio_ad_b1_02_lpuart2_tx>;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	pinmux_lpuart2_sleep: pinmux_lpuart2_sleep {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_03_gpio1_io19>;
+			drive-strength = "r0-6";
+			bias-pull-up;
+			bias-pull-up-value = "100k";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+		group1 {
+			pinmux = <&iomuxc_gpio_ad_b1_02_lpuart2_tx>;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
 	pinmux_usdhc1: pinmux_usdhc1 {
 		group0 {
 			pinmux = <&iomuxc_gpio_sd_b0_01_usdhc1_clk>;

@@ -6,3 +6,89 @@
 	};
 
 };
+
+&lpspi3 {
+	status = "okay";
+	pcs-sck-delay = <1>;
+	sck-pcs-delay = <1>;
+	transfer-delay = <1>;
+	cs-gpios = <&gpio1 28 GPIO_ACTIVE_LOW>;		/*P5*/
+
+	/* Sitronix ST7789V LCD */
+	st7789v: st7789v@0 {
+		compatible = "sitronix,st7789v";
+		reg = <0>;
+		spi-max-frequency = <50000000>; /* 8MHz */
+		label = "ST7789V";
+		cmd-data-gpios = <&gpio1 15 GPIO_ACTIVE_LOW>;		/*P13*/
+		reset-gpios = <&gpio1 14 GPIO_ACTIVE_LOW>;			/*P12*/
+		width = <240>;
+		height = <240>;
+		x-offset = <0>;
+		y-offset = <0>;
+		vcom = <0x19>;
+		gctrl = <0x35>;
+		vrhs = <0x12>;
+		vdvs = <0x20>;
+		mdac = <0x00>;
+		gamma = <0x01>;
+		colmod = <0x05>;
+		lcm = <0x2c>;
+		porch-param = [0c 0c 00 33 33];
+		cmd2en-param = [5a 69 02 01];
+		pwctrl1-param = [a4 a1];
+		pvgam-param = [D0 04 0D 11 13 2B 3F 54 4C 18 0D 0B 1F 23];
+		nvgam-param = [D0 04 0C 11 13 2C 3F 44 51 2F 1F 1F 20 23];
+		ram-param = [00 F0];
+		rgb-param = [CD 08 14];
+	};
+};
+
+&lpi2c3 {
+	sht3xd@44 {
+		compatible = "sensirion,sht3xd";
+		reg = <0x44>;
+		label = "SHT3XD";
+		status = "okay";
+	};
+
+	lis3dh@18 {
+		compatible = "st,lis3dh", "st,lis2dh";
+		reg = <0x18>;
+		label = "LIS3DH";
+		status = "okay";
+	};
+
+	pfc8563_rtc: pfc8563@51 {
+		compatible = "nxp,pcf8563";
+		reg = <0x51>;
+		label = "PCF85063";
+		status = "okay";
+	};
+};
+
+&flexpwm4_pwm3 {
+	status = "okay";
+	pinctrl-0 = <&pinmux_flexpwm_ch6>;
+	pinctrl-names = "default";
+	nxp,prescaler = <64>;
+};
+
+&flexpwm4_pwm2 {
+	status = "okay";
+	pinctrl-0 = <&pinmux_flexpwm_ch7>;
+	pinctrl-names = "default";
+	nxp,prescaler = <64>;
+};
+
+&adc2{
+	status = "okay";
+	pinctrl-0 = <&pinmux_adc2_9>;
+	pinctrl-names = "default";
+}
+
+&adc1{
+	status = "okay";
+	pinctrl-0 = <&pinmux_adc1_10>;
+	pinctrl-names = "default";
+}

@@ -9,6 +9,8 @@
 #include <nxp/nxp_imx/rt/mimxrt1062dvl6a-pinctrl.dtsi>
 
 &pinctrl {
+
+	/*mm_micro I2C1*/
 	pinmux_lpi2c1: pinmux_lpi2c1 {
 		group0 {
 			pinmux = <&iomuxc_gpio_ad_b1_01_lpi2c1_sda>,
@@ -21,6 +23,7 @@
 		};
 	};
 
+	/*mm_micro I2C0*/
 	pinmux_lpi2c3: pinmux_lpi2c3 {
 		group0 {
 			pinmux = <&iomuxc_gpio_ad_b1_07_lpi2c3_scl>,
@@ -32,6 +35,7 @@
 		};
 	};
 
+	/*mm_micro Download/Debug UART*/
 	pinmux_lpuart1: pinmux_lpuart1 {
 		group0 {
 			pinmux = <&iomuxc_gpio_ad_b0_13_lpuart1_rx>,
@@ -59,6 +63,7 @@
 		};
 	};
 
+	/*mm_micro UART0*/
 	pinmux_lpuart2: pinmux_lpuart2 {
 		group0 {
 			pinmux = <&iomuxc_gpio_ad_b1_03_lpuart2_rx>,
@@ -69,20 +74,357 @@
 		};
 	};
 
-	pinmux_lpuart2_sleep: pinmux_lpuart2_sleep {
+	/*mm_micro UART1*/
+	pinmux_lpuart8: pinmux_lpuart8 {
 		group0 {
-			pinmux = <&iomuxc_gpio_ad_b1_03_gpio1_io19>;
+			pinmux = <&iomuxc_gpio_ad_b1_11_lpuart8_rx>,
+				<&iomuxc_gpio_ad_b1_10_lpuart8_tx>;
 			drive-strength = "r0-6";
-			bias-pull-up;
-			bias-pull-up-value = "100k";
 			slew-rate = "slow";
 			nxp,speed = "100-mhz";
 		};
-		group1 {
-			pinmux = <&iomuxc_gpio_ad_b1_02_lpuart2_tx>;
+	};
+
+	/*mm_micro UART2*/
+	pinmux_lpuart4: pinmux_lpuart4 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b1_01_lpuart4_rx>,
+				<&iomuxc_gpio_b1_00_lpuart4_tx>;
 			drive-strength = "r0-6";
 			slew-rate = "slow";
 			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro UART3*/
+	pinmux_lpuart3: pinmux_lpuart3 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b0_09_lpuart3_rx>,
+				<&iomuxc_gpio_b0_08_lpuart3_tx>;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro SPI0*/
+	pinmux_lpspi3: pinmux_lpspi3 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_15_lpspi3_sck>,
+				<&iomuxc_gpio_ad_b1_13_lpspi3_sdi>,
+				<&iomuxc_gpio_ad_b1_14_lpspi3_sdo>;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro SPI1*/
+	pinmux_lpspi4: pinmux_lpspi4 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b0_03_lpspi4_sck>,
+				<&iomuxc_gpio_b0_01_lpspi4_sdi>,
+				<&iomuxc_gpio_b0_02_lpspi4_sdo>;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro ADC0*/
+	pinmux_adc2_9: pinmux_adc2_9 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_04_adc2_in9>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro ADC1*/
+	pinmux_adc2_13: pinmux_adc2_13 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_08_adc2_in13>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro ADC2*/
+	pinmux_adc2_14: pinmux_adc2_14 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_09_adc2_in14>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+	
+	/*mm_micro ADC3*/
+	pinmux_adc2_15: pinmux_adc2_15 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_10_adc2_in15>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro ADC4*/
+	pinmux_adc2_0: pinmux_adc2_0 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_11_adc2_in0>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro ADC5*/
+	pinmux_adc2_1: pinmux_adc2_1 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_12_adc2_in1>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro ADC6*/
+	pinmux_adc2_4: pinmux_adc2_4 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_15_adc2_in4>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro ADC7*/
+	pinmux_adc2_3: pinmux_adc2_3 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_14_adc2_in3>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+	
+	/*mm_micro ADC8*/
+	pinmux_adc2_2: pinmux_adc2_2 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_13_adc2_in2>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro ADC9*/
+	pinmux_adc2_8: pinmux_adc2_8 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_03_adc2_in8>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro ADC10*/
+	pinmux_adc1_7: pinmux_adc1_7 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_02_adc1_in7>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro ADC11*/
+	pinmux_adc1_10: pinmux_adc1_10 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_05_adc1_in10>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro ADC12*/
+	pinmux_adc1_3: pinmux_adc1_3 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b0_14_adc1_in3>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+	
+	/*mm_micro ADC13*/
+	pinmux_adc1_4: pinmux_adc1_4 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b0_15_adc1_in4>;
+			bias-disable;
+			drive-strength = "r0-6";
+			slew-rate = "slow";
+			nxp,speed = "100-mhz";
+		};
+	};
+
+	/*mm_micro PWM0*/
+	pinmux_flexpwm_ch0: pinmux_flexpwm_ch0 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_08_flexpwm4_pwma0>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+		};
+	};
+	
+
+	pinmux_flexpwm_ch1: pinmux_flexpwm_ch1 {
+		group0 {
+			pinmux = <&iomuxc_gpio_ad_b1_08_flexpwm4_pwma1>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+		};
+	};
+
+	pinmux_flexpwm_ch2: pinmux_flexpwm_ch2 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b1_03_flexpwm2_pwmb3>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+		};
+	};
+
+	pinmux_flexpwm_ch3: pinmux_flexpwm_ch3 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b1_02_flexpwm2_pwma3>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+		};
+	};
+
+	pinmux_flexpwm_ch4: pinmux_flexpwm_ch4 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b1_01_flexpwm1_pwmb3>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+		};
+	};
+
+
+	pinmux_flexpwm_ch5: pinmux_flexpwm_ch5 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b1_00_flexpwm1_pwma3>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+		};
+	};
+
+	pinmux_flexpwm_ch6: pinmux_flexpwm_ch6 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b1_15_flexpwm4_pwma3>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+		};
+	};
+
+	pinmux_flexpwm_ch7: pinmux_flexpwm_ch7 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b1_14_flexpwm4_pwma2>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+		};
+	};
+
+	pinmux_flexpwm_ch8: pinmux_flexpwm_ch8 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b0_06_flexpwm2_pwma0>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+		};
+	};
+
+	pinmux_flexpwm_ch9: pinmux_flexpwm_ch9 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b0_07_flexpwm2_pwmb0>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+		};
+	};
+
+	pinmux_flexpwm_ch10: pinmux_flexpwm_ch10 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b0_08_flexpwm2_pwma1>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+		};
+	};
+
+	pinmux_flexpwm_ch11: pinmux_flexpwm_ch11 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b0_09_flexpwm2_pwmb1>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+		};
+	};
+
+	pinmux_flexpwm_ch12: pinmux_flexpwm_ch12 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b0_10_flexpwm2_pwma2>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+		};
+	};
+
+	pinmux_flexpwm_ch13: pinmux_flexpwm_ch13 {
+		group0 {
+			pinmux = <&iomuxc_gpio_b0_11_flexpwm2_pwmb2>;
+
+			drive-strength = "r0-7";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
 		};
 	};
 

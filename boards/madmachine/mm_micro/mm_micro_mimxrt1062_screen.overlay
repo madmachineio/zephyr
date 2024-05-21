@@ -1,0 +1,62 @@
+#include <zephyr/dt-bindings/display/panel.h>
+
+/ {
+	chosen {
+		zephyr,flash = &sdram0;
+		zephyr,console = &lpuart2;
+		zephyr,shell-uart = &lpuart2;
+		zephyr,display = &lcdif;
+	};
+
+	panel {
+		compatible = "rocktech,rk043fn02h-ct";
+		port {
+			lcd_panel_in: endpoint {
+				remote-endpoint = <&lcd_panel_out>;
+			};
+		};
+	};
+
+};
+
+&lcdif {
+	status = "okay";
+	width = <480>;
+	height = <272>;
+	display-timings {
+		compatible = "zephyr,panel-timing";
+		hsync-len = <41>;
+		hfront-porch = <4>;
+		hback-porch = <8>;
+		vsync-len = <10>;
+		vfront-porch = <4>;
+		vback-porch = <2>;
+		de-active= <1>;
+		pixelclk-active = <1>;
+		hsync-active = <0>;
+		vsync-active = <0>;
+		clock-frequency = <9210240>;
+	};
+	pixel-format = <PANEL_PIXEL_FORMAT_BGR_565>;
+	data-bus-width = "16-bit";
+	pinctrl-0 = <&pinmux_lcdif>;
+	pinctrl-names = "default";
+	backlight-gpios = <&gpio2 31 GPIO_ACTIVE_HIGH>;
+	port {
+		lcd_panel_out: endpoint {
+			remote-endpoint = <&lcd_panel_in>;
+		};
+	};
+};
+
+touch_i2c: &lpi2c1 {
+	status = "okay";
+	pinctrl-0 = <&pinmux_lpi2c1>;
+	pinctrl-names = "default";
+
+	ft5336: ft5336@38 {
+		compatible = "focaltech,ft5336";
+		reg = <0x38>;
+		int-gpios = <&gpio1 11 GPIO_ACTIVE_LOW>;
+	};
+};

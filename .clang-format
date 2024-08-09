@@ -93,8 +93,10 @@ IncludeCategories:
   - Regex: '.*'
     Priority: 3
 IndentCaseLabels: false
+IndentGotoLabels: false
 IndentWidth: 8
 InsertBraces: true
+SpaceBeforeInheritanceColon: False
 SpaceBeforeParens: ControlStatementsExceptControlMacros
 SortIncludes: Never
 UseTab: ForContinuationAndIndentation

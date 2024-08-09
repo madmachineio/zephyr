@@ -186,6 +186,9 @@ Networking
 * IPv6:
 
 * LwM2M:
+  * Location object: optional resources altitude, radius, and speed can now be
+  used optionally as per the location object's specification. Users of these
+  resources will now need to provide a read buffer.
 
 * Misc:
 
@@ -250,6 +253,10 @@ Libraries / Subsystems
 * State Machine Framework
 
 * Storage
+
+  * LittleFS: The module has been updated with changes committed upstream
+    from version 2.8.1, the last module update, up to and including
+    the released version 2.9.3.
 
 * Task Watchdog
 

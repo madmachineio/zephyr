@@ -75,6 +75,19 @@ Mbed TLS
   corresponding build symbol was removed in Mbed TLS 3.1.0 and is now assumed to
   be enabled. (:github:`77657`)
 
+TinyCrypt
+=========
+
+* Starting from this release the library is marked as deprecated (:github:`79566`).
+  The reasons for this are (:github:`43712``):
+
+  * the upstream version of this library is unmaintained.
+
+  * to reduce the number of crypto libraries available in Zephyr (currently there are
+    3 different implementations: TinyCrypt, MbedTLS and PSA Crypto APIs).
+
+  The PSA Crypto API is now the de-facto standard to perform crypto operations.
+
 Trusted Firmware-M
 ==================
 
@@ -123,6 +136,12 @@ Device Drivers and Devicetree
   Chip variants with open-drain outputs (``mcp23x09``, ``mcp23x18``) now correctly reflect this in
   their driver API, users of these devices should ensure they pass appropriate values to
   :c:func:`gpio_pin_set`. (:github:`65797`)
+
+* The ``power-domain`` property has been removed in favor of ``power-domains``.
+  The new property allows to add more than one power domain.
+  ``power-domain-names`` is also available to optionally name each entry in
+  ``power-domains``. The number of cells in the ``power-domains`` property need
+  to be defined using ``#power-domain-cells``.
 
 Analog Digital Converter (ADC)
 ==============================
@@ -308,6 +327,9 @@ Bluetooth
 
 Bluetooth HCI
 =============
+
+* The ``bt-hci-bus`` and ``bt-hci-quirks`` devicetree properties for HCI bindings have been changed
+  to use lower-case strings without the ``BT_HCI_QUIRK_`` and ``BT_HCI_BUS_`` prefixes.
 
 Bluetooth Mesh
 ==============

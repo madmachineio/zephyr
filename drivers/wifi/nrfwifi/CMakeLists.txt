@@ -128,6 +128,10 @@ zephyr_library_sources_ifdef(CONFIG_NRF70_STA_MODE
   ${OS_AGNOSTIC_BASE}/fw_if/umac_if/src/fmac_util.c
 )
 
+zephyr_library_sources_ifdef(CONFIG_NRF70_PROMISC_DATA_RX
+  ${OS_AGNOSTIC_BASE}/fw_if/umac_if/src/fmac_promisc.c
+)
+
 zephyr_library_sources_ifdef(CONFIG_NRF70_ON_QSPI
   src/qspi/src/qspi_if.c
 )
@@ -285,6 +289,18 @@ zephyr_compile_definitions_ifdef(CONFIG_NRF70_AP_MODE
   -DNRF70_AP_MODE
 )
 
+zephyr_compile_definitions_ifdef(CONFIG_NRF_WIFI_MGMT_BUFF_OFFLOAD
+  -DNRF_WIFI_MGMT_BUFF_OFFLOAD
+)
+
+zephyr_compile_definitions_ifdef(CONFIG_NRF_WIFI_FEAT_KEEPALIVE
+  -DNRF_WIFI_FEAT_KEEPALIVE
+)
+
+zephyr_compile_definitions_ifdef(CONFIG_NRF_WIFI_FEAT_KEEPALIVE
+  -DNRF_WIFI_KEEPALIVE_PERIOD_S=${CONFIG_NRF_WIFI_KEEPALIVE_PERIOD_S}
+)
+
 zephyr_compile_definitions(
   -DNRF70_RX_NUM_BUFS=${CONFIG_NRF70_RX_NUM_BUFS}
   -DNRF70_MAX_TX_TOKENS=${CONFIG_NRF70_MAX_TX_TOKENS}
@@ -326,4 +342,5 @@ zephyr_compile_definitions(
   -DNRF70_ANT_GAIN_5G_BAND1=${CONFIG_NRF70_ANT_GAIN_5G_BAND1}
   -DNRF70_ANT_GAIN_5G_BAND2=${CONFIG_NRF70_ANT_GAIN_5G_BAND2}
   -DNRF70_ANT_GAIN_5G_BAND3=${CONFIG_NRF70_ANT_GAIN_5G_BAND3}
+  -DNRF_WIFI_PS_INT_PS=${CONFIG_NRF_WIFI_PS_INT_PS}
 )

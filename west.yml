@@ -157,7 +157,7 @@ manifest:
       groups:
         - hal
     - name: hal_espressif
-      revision: 61a002ad757f567cdef92014b483e6f325c41afc
+      revision: 5e7220b429caa5d374286b3a3122c5d303c5f78a
       path: modules/hal/espressif
       west-commands: west/west-commands.yml
       groups:
@@ -188,7 +188,7 @@ manifest:
       groups:
         - hal
     - name: hal_nordic
-      revision: 1abc0519d768c203eb27d19a0fa26dbae07e2b71
+      revision: af91488c6edc4cebaf8b072c8bb258122a055cdb
       path: modules/hal/nordic
       groups:
         - hal
@@ -198,7 +198,7 @@ manifest:
       groups:
         - hal
     - name: hal_nxp
-      revision: 9702923eeb6f4a9ca063ca3b200324b118d3e843
+      revision: 4597b16cfedf5553cb155151e65eb994d5d0ef25
       path: modules/hal/nxp
       groups:
         - hal
@@ -259,7 +259,7 @@ manifest:
         - hal
     - name: hostap
       path: modules/lib/hostap
-      revision: 7c32520564908e1220976b6c185dec296b6d4a80
+      revision: ac59d28778b20cd68702f55dad2a27d648e3d571
     - name: libmetal
       revision: a6851ba6dba8c9e87d00c42f171a822f7a29639b
       path: modules/hal/libmetal

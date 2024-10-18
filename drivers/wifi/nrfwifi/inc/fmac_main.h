@@ -109,6 +109,11 @@ struct nrf_wifi_ctx_zep {
 	unsigned char *extended_capa, *extended_capa_mask;
 	unsigned int extended_capa_len;
 	struct k_mutex rpu_lock;
+#ifdef CONFIG_NRF_WIFI_RPU_RECOVERY
+	bool rpu_recovery_in_progress;
+	unsigned long last_rpu_recovery_time_ms;
+	unsigned int rpu_recovery_retries;
+#endif /* CONFIG_NRF_WIFI_RPU_RECOVERY */
 };
 
 struct nrf_wifi_drv_priv_zep {
@@ -128,7 +133,13 @@ void set_tx_pwr_ceil_default(struct nrf_wifi_tx_pwr_ceil_params *pwr_ceil_params
 const char *nrf_wifi_get_drv_version(void);
 enum nrf_wifi_status nrf_wifi_fmac_dev_add_zep(struct nrf_wifi_drv_priv_zep *drv_priv_zep);
 enum nrf_wifi_status nrf_wifi_fmac_dev_rem_zep(struct nrf_wifi_drv_priv_zep *drv_priv_zep);
-#endif /* !CONFIG_NRF_WIFI_BUILD_ONLY_MODE */
+struct nrf_wifi_vif_ctx_zep *nrf_wifi_get_vif_ctx(struct net_if *iface);
+#ifdef CONFIG_NRF_WIFI_RPU_RECOVERY
+void nrf_wifi_rpu_recovery_cb(void *vif_ctx,
+		void *event_data,
+		unsigned int event_len);
+#endif /* CONFIG_NRF_WIFI_RPU_RECOVERY */
+#endif /* !CONFIG_NRF70_OFFLOADED_RAW_TX */
 #ifdef CONFIG_NRF_WIFI_BUILD_ONLY_MODE
 inline enum nrf_wifi_status nrf_wifi_fw_load(void *rpu_ctx)
 {
@@ -139,10 +150,4 @@ inline enum nrf_wifi_status nrf_wifi_fw_load(void *rpu_ctx)
 #else
 enum nrf_wifi_status nrf_wifi_fw_load(void *rpu_ctx);
 #endif /* CONFIG_NRF_WIFI_BUILD_ONLY_MODE */
-#ifndef CONFIG_NRF70_OFFLOADED_RAW_TX
-struct nrf_wifi_vif_ctx_zep *nrf_wifi_get_vif_ctx(struct net_if *iface);
-void nrf_wifi_rpu_recovery_cb(void *vif_ctx,
-		void *event_data,
-		unsigned int event_len);
-#endif /* !CONFIG_NRF_WIFI_BUILD_ONLY_MODE */
 #endif /* __ZEPHYR_FMAC_MAIN_H__ */

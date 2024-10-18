@@ -252,7 +252,7 @@ static void nrf_wifi_process_rssi_from_rx(void *vif_ctx,
 
 	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
 
-	if (!rpu_ctx_zep) {
+	if (!(rpu_ctx_zep && rpu_ctx_zep->rpu_ctx)) {
 		LOG_ERR("%s: rpu_ctx_zep is NULL", __func__);
 		return;
 	}
@@ -656,8 +656,6 @@ enum nrf_wifi_status nrf_wifi_fmac_dev_add_zep(struct nrf_wifi_drv_priv_zep *drv
 		goto err;
 	}
 
-	k_mutex_init(&rpu_ctx_zep->rpu_lock);
-
 	return status;
 err:
 	if (rpu_ctx) {
@@ -717,7 +715,7 @@ static int nrf_wifi_drv_main_zep(const struct device *dev)
 	callbk_fns.if_carr_state_chg_callbk_fn = nrf_wifi_if_carr_state_chg;
 	callbk_fns.rx_frm_callbk_fn = nrf_wifi_if_rx_frm;
 #if defined(CONFIG_NRF70_RAW_DATA_RX) || defined(CONFIG_NRF70_PROMISC_DATA_RX)
-	callbk_fns.rx_sniffer_frm_callbk_fn = nrf_wifi_if_sniffer_rx_frm;
+	callbk_fns.sniffer_callbk_fn = nrf_wifi_if_sniffer_rx_frm;
 #endif /* CONFIG_NRF70_RAW_DATA_RX || CONFIG_NRF70_PROMISC_DATA_RX */
 #endif
 	rx_buf_pools[0].num_bufs = rx1_num_bufs;
@@ -816,6 +814,7 @@ static int nrf_wifi_drv_main_zep(const struct device *dev)
 			      nrf_wifi_scan_timeout_work);
 #endif /* CONFIG_NRF70_RADIO_TEST */
 
+	k_mutex_init(&rpu_drv_priv_zep.rpu_ctx_zep.rpu_lock);
 	return 0;
 #ifdef CONFIG_NRF70_RADIO_TEST
 fmac_deinit:

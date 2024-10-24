@@ -119,10 +119,6 @@ zephyr_compile_definitions_ifdef(CONFIG_SOC_GECKO_DEV_INIT
   SL_CATALOG_HFXO_MANAGER_PRESENT
 )
 
-zephyr_compile_options(
-  -mcmse # Cortex-M Security Extensions are needed for startup code
-)
-
 zephyr_library_sources(
   ${DEVICE_DIR}/SiliconLabs/${SILABS_DEVICE_FAMILY}/Source/system_${CONFIG_SOC_SERIES}.c
   ${EMLIB_DIR}/src/em_system.c
@@ -140,6 +136,19 @@ zephyr_library_sources(
 if(NOT SILABS_DEVICE_FAMILY_NUMBER EQUAL "21")
   zephyr_library_sources(
     ${SERVICE_DIR}/device_manager/clocks/sl_device_clock_efr32xg${SILABS_DEVICE_FAMILY_NUMBER}.c
+  )
+endif()
+
+# Sleeptimer
+if(CONFIG_SOC_SILABS_SLEEPTIMER)
+  zephyr_library_sources(
+    ${PERIPHERAL_DIR}/src/sl_hal_sysrtc.c
+    ${SERVICE_DIR}/sleeptimer/src/sl_sleeptimer_hal_rtcc.c
+    ${SERVICE_DIR}/sleeptimer/src/sl_sleeptimer_hal_sysrtc.c
+    ${SERVICE_DIR}/sleeptimer/src/sl_sleeptimer.c
+  )
+  zephyr_compile_definitions(
+    SL_CATALOG_SLEEPTIMER_PRESENT
   )
 endif()
 
@@ -176,12 +185,6 @@ zephyr_library_sources_ifdef(CONFIG_SOC_GECKO_PRS          ${EMLIB_DIR}/src/em_p
 zephyr_library_sources_ifdef(CONFIG_SOC_GECKO_RMU          ${EMLIB_DIR}/src/em_rmu.c)
 zephyr_library_sources_ifdef(CONFIG_SOC_GECKO_RTC          ${EMLIB_DIR}/src/em_rtc.c)
 zephyr_library_sources_ifdef(CONFIG_SOC_GECKO_RTCC         ${EMLIB_DIR}/src/em_rtcc.c)
-zephyr_library_sources_ifdef(CONFIG_COUNTER_GECKO_STIMER
-  ${PERIPHERAL_DIR}/src/sl_hal_sysrtc.c
-  ${SERVICE_DIR}/sleeptimer/src/sl_sleeptimer_hal_rtcc.c
-  ${SERVICE_DIR}/sleeptimer/src/sl_sleeptimer_hal_sysrtc.c
-  ${SERVICE_DIR}/sleeptimer/src/sl_sleeptimer.c
-)
 zephyr_library_sources_ifdef(CONFIG_SOC_GECKO_EUSART       ${EMLIB_DIR}/src/em_eusart.c)
 zephyr_library_sources_ifdef(CONFIG_SOC_GECKO_TIMER        ${EMLIB_DIR}/src/em_timer.c)
 zephyr_library_sources_ifdef(CONFIG_SOC_GECKO_USART        ${EMLIB_DIR}/src/em_usart.c)

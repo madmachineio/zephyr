@@ -78,12 +78,18 @@ New APIs and options
 * Architectures
 
   * :kconfig:option:`CONFIG_SRAM_SW_ISR_TABLE`
+  * ARM (Cortex-M) system state save/restore primitives
+
+    * :c:func:`z_arm_save_scb_context` / :c:func:`z_arm_restore_scb_context`
+    * :c:func:`z_arm_save_mpu_context` / :c:func:`z_arm_restore_mpu_context`
+    * Existing :c:func:`z_arm_save_fp_context` and :c:func:`z_arm_save_fp_context` have also been updated
 
 * Bluetooth
 
   * Audio
 
     * :c:struct:`bt_audio_codec_cfg` now contains a target_latency and a target_phy option
+    * :c:func:`bt_bap_broadcast_source_foreach_stream`
 
 * Display
 
